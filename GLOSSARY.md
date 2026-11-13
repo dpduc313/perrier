@@ -81,6 +81,14 @@ _Avoid_: File, source, attachment
 A passage of a document that can be retrieved on its own and traced back to its page.
 _Avoid_: Snippet, passage, fragment
 
+**Chunking Strategy**:
+How a Document is split into Chunks: by heading (each Chunk stays inside one section and one page, led by its headings) or by fixed length (each page cut into overlapping pieces of the same size). One setting chooses it for every upload; a Document records the one that split it.
+_Avoid_: Chunker, splitter, chunking mode
+
+**Reader**:
+What turns a PDF into text before it is chunked: Docling (layout, headings and tables), PyMuPDF (the text layer alone), or a vision model reading each page as an image. One setting chooses it for every upload; a Document records the one that read it.
+_Avoid_: Parser, extractor, OCR (that is only part of what a Reader may do)
+
 **Citation**:
 A pointer from an answer to the exact document page a claim came from.
 _Avoid_: Source, reference

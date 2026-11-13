@@ -152,7 +152,19 @@ OPENAI_REASONING_EFFORT = os.getenv("PERRY_OPENAI_REASONING_EFFORT", "none")
 CHAT_TIMEOUT = float(os.getenv("PERRY_CHAT_TIMEOUT", "45"))
 # Embeddings run on this machine (docs/adr/0003): free, no quota, and nothing embedded
 # leaves it. Changing the model re-embeds every Chunk and Summary when Perry next starts.
-EMBEDDING_MODEL = os.getenv("PERRY_EMBEDDING_MODEL", "nomic-embed-text")
+EMBEDDING_MODEL = os.getenv("PERRY_EMBEDDING_MODEL", "embeddinggemma-2")
+# The paid OpenAI vision model that reads every page of a PDF as Markdown when
+# PERRY_DOCUMENT_READER is "vision" (perry.documents). Needs OPENAI_API_KEY.
+PAGE_READER_MODEL = os.getenv("PERRY_PAGE_READER_MODEL", "gpt-5.4-mini")
+# The embedding model's tokenizer on Hugging Face, so heading chunking (perry.documents)
+# measures Chunks in the tokens the embedding model reads. Downloaded once, on first use.
+# Empty estimates tokens at about 4 characters each instead.
+EMBEDDING_TOKENIZER = os.getenv(
+    "PERRY_EMBEDDING_TOKENIZER",
+    "nomic-ai/nomic-embed-text-v1.5"
+    if EMBEDDING_MODEL.startswith("nomic-embed")
+    else "google/embeddinggemma-2",
+).strip()
 # Text-to-speech: a Gemini model whose name ends in "-tts" answers with audio.
 TTS_MODEL = os.getenv("PERRY_TTS_MODEL", "gemini-2.5-flash-preview-tts")
 TTS_VOICE = os.getenv("PERRY_TTS_VOICE", "Kore")
@@ -183,15 +195,22 @@ RERANK_MIN_SCORE = (
     else None
 )
 
-# nomic-embed-text's size. pgvector's HNSW index supports at most 2000 dimensions.
-# Changing it resizes the columns and re-embeds everything (perry.reembed).
+# EmbeddingGemma 2's size (and nomic-embed-text's). pgvector's HNSW index supports at
+# most 2000 dimensions. Changing it resizes the columns and re-embeds everything
+# (perry.reembed).
 EMBEDDING_DIMENSIONS = int(os.getenv("PERRY_EMBEDDING_DIMENSIONS", "768"))
-# nomic-embed-text is trained with these task prefixes; other models get none.
-_EMBEDDING_PREFIXES = (
-    ("search_document: ", "search_query: ")
-    if EMBEDDING_MODEL.startswith("nomic-embed")
-    else ("", "")
-)
+
+
+def _embedding_prefixes(model: str) -> tuple[str, str]:
+    """The (document, query) task prefixes `model` is trained with; others get none."""
+    if model.startswith("embeddinggemma"):
+        return "title: none | text: ", "task: search result | query: "
+    if model.startswith("nomic-embed"):
+        return "search_document: ", "search_query: "
+    return "", ""
+
+
+_EMBEDDING_PREFIXES = _embedding_prefixes(EMBEDDING_MODEL)
 
 
 @dataclass(frozen=True)
@@ -294,6 +313,9 @@ class Provider:
     embed_query: Callable[[str], list[float]]
     # The name the usage ledger prices embedding calls by.
     embedding_model: str = "unknown"
+    # How many of the embedding model's tokens a text is, if the provider knows its
+    # tokenizer; otherwise estimated at about 4 characters per token.
+    count_embedding_tokens: Callable[[str], int] | None = None
     # Speech, if the provider has it: (audio bytes, MIME type) -> text, and text -> WAV.
     transcribe: Callable[[bytes, str], Transcription] | None = None
     synthesize: Callable[[str], Speech] | None = None
@@ -301,6 +323,11 @@ class Provider:
     # and the name the usage ledger prices those calls by.
     read_image: Callable[[bytes, str], Transcription] | None = None
     vision_model: str = "unknown"
+    # The vision reader, if the provider has one: (page image, MIME type) -> the page as
+    # Markdown, for reading every page of a PDF (perry.documents' "vision" reader), and
+    # the name the usage ledger prices those calls by.
+    read_page_as_markdown: Callable[[bytes, str], Transcription] | None = None
+    page_reader_model: str = "unknown"
     # True only when chat (text generation) runs on this machine, so nothing the
     # Agents read leaves it. Embeddings may still be remote: they never see email.
     local_text_generation: bool = False
@@ -648,6 +675,15 @@ def _default() -> Provider:
         ),
         embed_query=lambda text: embeddings.embed_query(query_prefix + text),
         embedding_model=EMBEDDING_MODEL,
+        count_embedding_tokens=(
+            (
+                lambda text: len(
+                    _embedding_tokenizer().encode(document_prefix + text, add_special_tokens=False)
+                )
+            )
+            if EMBEDDING_TOKENIZER
+            else None
+        ),
         # Speech stays on the free model, with no paid fallback; so do scanned pages
         # unless the company's model can read them (docs/adr/0006).
         transcribe=lambda audio, mime_type: _gemini_transcribe(gemini(), audio, mime_type),
@@ -656,6 +692,20 @@ def _default() -> Provider:
         vision_model=(
             INET_QWEN_MODEL if INET_QWEN_BASE_URL and "knowledge" in INET_QWEN_FOR else LLM_MODEL
         ),
+        read_page_as_markdown=(
+            (
+                lambda image, mime_type: _read_image(
+                    _openai_chat(PAGE_READER_MODEL),
+                    image,
+                    mime_type,
+                    PAGE_READER_MODEL,
+                    _READ_PAGE_AS_MARKDOWN_PROMPT,
+                )
+            )
+            if paid_chat_available()
+            else None
+        ),
+        page_reader_model=PAGE_READER_MODEL,
         summary_model=_ollama_summary_model,
         summary_model_name=SUMMARY_MODEL,
         colbert=LocalColbert(COLBERT_MODEL) if COLBERT_MODEL else None,
@@ -720,12 +770,27 @@ def _read_scanned_page(image: bytes, mime_type: str, gemini: Callable[[], BaseCh
     return _read_image(gemini(), image, mime_type, LLM_MODEL)
 
 
-def _read_image(model: BaseChatModel, image: bytes, mime_type: str, model_name: str):
+_READ_PAGE_AS_MARKDOWN_PROMPT = (
+    "This is a page of a document. Transcribe all the text on it verbatim, in reading "
+    "order and in its original language, as Markdown: each heading as a Markdown heading "
+    "of its level (#, ##, ...), lists as lists, tables as Markdown tables. Leave out page "
+    "headers, footers and page numbers. Reply with the Markdown only, no comments and no "
+    "code fence. If the page has no text, reply with nothing."
+)
+
+
+def _read_image(
+    model: BaseChatModel,
+    image: bytes,
+    mime_type: str,
+    model_name: str,
+    prompt: str = _READ_PAGE_PROMPT,
+):
     reply = model.invoke(
         [
             HumanMessage(
                 content=[
-                    {"type": "text", "text": _READ_PAGE_PROMPT},
+                    {"type": "text", "text": prompt},
                     images.image_block(image, mime_type),
                 ]
             )
@@ -956,6 +1021,19 @@ def embed_query(text: str) -> list[float]:
     return _provider().embed_query(text)
 
 
+def count_embedding_tokens(text: str) -> int:
+    """How many tokens the embedding model reads when embedding `text` as a Document's."""
+    count = _provider().count_embedding_tokens
+    return count(text) if count is not None else estimate_tokens([text])
+
+
+@cache
+def _embedding_tokenizer():
+    from transformers import AutoTokenizer
+
+    return AutoTokenizer.from_pretrained(EMBEDDING_TOKENIZER)
+
+
 def speech_supported() -> bool:
     """Whether the current provider can do push-to-talk (speech-to-text and text-to-speech)."""
     provider = _provider()
@@ -1087,11 +1165,36 @@ def transcribe_page(image: bytes, mime_type: str) -> str:
     read = _provider().read_image
     if read is None:
         raise VisionUnavailable("This model provider can't read images.")
+    return _read_page(read, image, mime_type, "transcription")
+
+
+def page_reader_supported() -> bool:
+    """Whether the current provider can read whole PDF pages as Markdown (the vision
+    reader); it needs OPENAI_API_KEY."""
+    return _provider().read_page_as_markdown is not None
+
+
+def page_reader_model() -> str:
+    """The name the usage ledger prices the vision reader's calls by."""
+    return _provider().page_reader_model
+
+
+def read_page_as_markdown(image: bytes, mime_type: str) -> str:
+    """`image`, a rendered page of a Document, as Markdown (headings, lists, tables)."""
+    read = _provider().read_page_as_markdown
+    if read is None:
+        raise VisionUnavailable(
+            f"The vision reader needs OPENAI_API_KEY to read pages with {PAGE_READER_MODEL}."
+        )
+    return _read_page(read, image, mime_type, "page_reading")
+
+
+def _read_page(read, image: bytes, mime_type: str, kind: str) -> str:
     from perry import usage
 
     usage.check_turn_ceiling()
     result = read(image, mime_type)
-    usage.record("transcription", result.model, result.input_tokens, result.output_tokens)
+    usage.record(kind, result.model, result.input_tokens, result.output_tokens)
     return result.text
 
 

@@ -49,7 +49,7 @@ LANGCHAIN_API_KEY=...
 Install [Ollama](https://ollama.com) and pull the local models: embeddings and Summaries run on this machine.
 
 ```powershell
-ollama pull nomic-embed-text   # embeddings for every Chunk and Summary (needed)
+ollama pull embeddinggemma-2   # embeddings for every Chunk and Summary (needed)
 ollama pull qwen3:8b           # Summaries, Document metadata and RAPTOR (background); Dataset descriptions too without inet-qwen
 ```
 
@@ -243,7 +243,7 @@ Knowledge Turns can also name the Retrieval Technique expected to find the answe
 
 **Tuning the cascade margin.** `--tune-margin` embeds every eval Turn that expects a technique (embedding calls only, a fraction of a cent) and measures how much nearer semantic picking's top technique is than the runner-up, and whether the top one is the expected one. The tuned margin is the smallest that sits above every wrong pick's gap (midway to the next right one): every question cascade settles semantically on the eval Turns was picked right, and the rest go to logical picking, which is assumed right there (measuring it needs chat calls; the full eval run's soft check does that). Record the printed value as `DEFAULT_CASCADE_MARGIN` in [perry/picking.py](perry/picking.py) and in the settings table. Rerun it after changing technique example questions, technique eval Turns or the embedding model. Eval questions must never be benchmark questions or router example questions (a test checks), or the tuning grades its own answer key.
 
-The current `0.116` comes from a run on 2026-10-09 with `nomic-embed-text`: semantic picking alone was right on 8 of 22 Turns, and its most confident wrong pick sets the margin above every Turn's gap, so for now cascade leaves every question to logical picking (never a wrong semantic pick, at one extra model call each). Better example questions would let cascade settle more questions semantically. (With `gemini-embedding-001` it was `0.074`, 11 of 22 right.) Rerun the tuning after changing the embedding model or the example questions; it only embeds, so it's free.
+The current `0.1425` comes from a run on 2026-11-13 with `embeddinggemma-2`: semantic picking alone was right on 10 of 22 Turns, and its most confident wrong pick sets the margin above every Turn's gap, so for now cascade leaves every question to logical picking (never a wrong semantic pick, at one extra model call each). Better example questions would let cascade settle more questions semantically. (With `nomic-embed-text` it was `0.116`, 8 of 22 right; with `gemini-embedding-001`, `0.074`, 11 of 22 right.) Rerun the tuning after changing the embedding model or the example questions; it only embeds, so it's free.
 
 ## Connecting Google (Task Agent)
 
@@ -290,6 +290,9 @@ uv run python -m benchmark.run grid-report                        # redraw the t
 
 ```bash
 uv run python -m benchmark.run perry-retrieval   # free: page recall of hybrid search, without and with Reranking
+uv run python -m benchmark.run perry-retrieval --reader docling,pymupdf,vision --chunking heading,fixed
+    # the same for each Reader and Chunking Strategy -> results/perry-retrieval-comparison.md
+    # (vision reads every page on gpt-5.4-mini: it shows the estimate and asks first)
 uv run python -m benchmark.run grid --only hybrid_search,hybrid_search+rerank,cascade,cascade+rerank   # 92 Turns, about $0.26
 ```
 
@@ -318,7 +321,11 @@ All optional; add any of these to `.env` to override the default.
 | `PERRY_PAID_CHAT_ONLY` | `false` | `true`: chat goes straight to the paid model, never Gemini (faster, but every Turn costs money; needs `OPENAI_API_KEY`). Knowledge work still runs on `inet-qwen` first when it is set |
 | `PERRY_BENCHMARK_LLM_MODEL` | `gpt-5.4-nano` | Paid OpenAI chat model every benchmark-grid Turn runs on |
 | `PERRY_OPENAI_REASONING_EFFORT` | `none` | Reasoning effort for the OpenAI models (`none` is the cheapest, and the only one the API accepts with tools) |
-| `PERRY_EMBEDDING_MODEL` | `nomic-embed-text` | Local Ollama embedding model; changing it re-embeds every Chunk and Summary when Perry next starts |
+| `PERRY_EMBEDDING_MODEL` | `embeddinggemma-2` | Local Ollama embedding model; changing it re-embeds every Chunk and Summary when Perry next starts; give it a zero entry in `prices.toml` |
+| `PERRY_EMBEDDING_TOKENIZER` | `google/embeddinggemma-2` (`nomic-ai/nomic-embed-text-v1.5` for nomic) | The embedding model's tokenizer on Hugging Face (downloaded on first use), which measures heading Chunks; empty estimates 4 characters a token |
+| `PERRY_CHUNKING` | `heading` | Chunking Strategy for uploads (docs/adr/0009): `heading` keeps each Chunk in one section, led by its headings (at most 384 tokens); `fixed` cuts each page into overlapping pieces of about 1,500 characters. A file uploaded again under the other strategy is chunked again |
+| `PERRY_DOCUMENT_READER` | `docling` | Reader for PDFs (docs/adr/0009): `docling` (layout, headings, tables; local), `pymupdf` (the text layer only; local, fastest), or `vision` (`PERRY_PAGE_READER_MODEL` reads every page as Markdown; paid, needs `OPENAI_API_KEY`). A file uploaded again under another Reader is read again |
+| `PERRY_PAGE_READER_MODEL` | `gpt-5.4-mini` | OpenAI vision model the `vision` Reader reads pages with; give it a price in `prices.toml` |
 | `PERRY_EMBEDDING_DIMENSIONS` | `768` | The embedding model's vector size; changing it resizes the columns and re-embeds at the next start |
 | `PERRY_TTS_MODEL` | `gemini-2.5-flash-preview-tts` | Reads voice answers aloud |
 | `PERRY_TTS_VOICE` | `Kore` | Voice for read-aloud answers |
@@ -335,7 +342,7 @@ All optional; add any of these to `.env` to override the default.
 | `PERRY_RERANK_MIN_SCORE` | (off) | If set, Chunks the reranker scores below it are left out (the best one is always kept). Off by default: the default model scores some right answers very low (see ADR-0005) |
 | `PERRY_SHOW_FOUND_WITH` | `true` | End answers from your Documents with the "Found with" line naming the Retrieval Technique; `false` turns it off |
 | `PERRY_PICKING_MODE` | `cascade` | How the Knowledge Agent picks a Retrieval Technique: `semantic` (nearest example questions), `logical` (the model chooses from the descriptions) or `cascade` (semantic when clearly closest, else logical). The sidebar's forced technique wins over all of them |
-| `PERRY_CASCADE_MARGIN` | `0.116` | How much nearer (cosine similarity) the closest technique's examples must be than the runner-up's for `cascade` to pick semantically; tuned on the eval set, never the benchmark (see [Eval set](#eval-set)) |
+| `PERRY_CASCADE_MARGIN` | `0.1425` | How much nearer (cosine similarity) the closest technique's examples must be than the runner-up's for `cascade` to pick semantically; tuned on the eval set, never the benchmark (see [Eval set](#eval-set)) |
 | `PERRY_PRICES_FILE` | `prices.toml` | Price table, USD per million tokens per model |
 | `PERRY_ANALYST_PASSWORD` | `perry_analyst` | Password of the read-only `perry_analyst` role |
 | `PERRY_ANALYSIS_TIMEOUT_MS` | `10000` | Statement timeout for the Analysis Agent's SQL |

@@ -29,6 +29,10 @@ os.environ["PERRY_PICKING_MODE"] = "logical"
 os.environ["PERRY_COLBERT_MODEL"] = ""
 # No real reranker either; tests that rerank use the fake one.
 os.environ["PERRY_RERANK_MODEL"] = ""
+# No tokenizer download: Chunks are measured at about 4 characters per token. Heading
+# chunking whatever .env says; tests of fixed chunking choose it themselves.
+os.environ["PERRY_EMBEDDING_TOKENIZER"] = ""
+os.environ["PERRY_CHUNKING"] = "heading"
 # Datasets are described by the fake local model, whatever .env says; tests of describing
 # on the company's model choose it themselves.
 os.environ["PERRY_DATASET_DESCRIPTION_MODEL"] = "local"

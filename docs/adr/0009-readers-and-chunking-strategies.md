@@ -1,0 +1,15 @@
+# Docling reads Documents, and the Reader and Chunking Strategy are settings
+
+Documents are read with Docling by default instead of plain text extraction, so a Chunk can follow the Document's structure: its headings, lists and tables. Which Reader turns a PDF into text is a setting, `PERRY_DOCUMENT_READER`: `docling` (the default), `pymupdf` (the text layer with no structure, as Perry read PDFs before), or `vision`, where a paid vision model (`PERRY_PAGE_READER_MODEL`, gpt-5.4-mini) reads each rendered page into Markdown. How the text is then split is another setting, `PERRY_CHUNKING`, with two Chunking Strategies: `heading` (the default) keeps each Chunk inside one section and leads it with that section's headings, up to 384 of the embedding model's tokens; `fixed` cuts each page's text into overlapping pieces of about 1,500 characters, as Perry did before. Every combination stays so they can be compared on the same Documents (`benchmark.run perry-retrieval --reader docling,pymupdf,vision --chunking heading,fixed`). Chunks are embedded with EmbeddingGemma 2 on Ollama (ADR-0003).
+
+We kept the old Reader and Chunking Strategy instead of replacing them because the new ones only help where there is structure to find: in the benchmark's PDFs Docling finds no headings, and each page is shorter than one fixed Chunk, so docling and pymupdf, heading and fixed, make nearly the same Chunks there. Heading chunking measures Chunks with the embedding model's own tokenizer (downloaded from Hugging Face on first use), so a Chunk's size is what the model reads.
+
+## Consequences
+
+- A heading Chunk never spans two pages, though Docling's own merging would allow it: a Citation names one page, and a Chunk spanning two would cite only the first. Pages read one at a time (pymupdf, vision) are chunked one at a time, so a section continuing on the next page loses its headings there.
+- With the docling and pymupdf Readers, pages without a text layer still go to the vision model for scanned pages (Docling's OCR is off); their text is chunked with the Chunking Strategy too. With the vision Reader every page goes to the page reader instead, and an upload without `OPENAI_API_KEY` is refused rather than stored empty.
+- The vision Reader is the only one that costs money: about one model call per page, estimated before upload and counted toward the Daily Cap like the rest of ingestion, recorded as `page_reading` in the Usage Ledger.
+- Docling reads PDFs with pypdfium2, not its default reader: on a page that is only an image the default took two minutes and crashed natively inside, where pypdfium2 takes seconds with the same text.
+- Reading a PDF with Docling runs its layout model on the CPU (a few seconds a page; its models download once). Uploads are slower than with pymupdf.
+- Each Document records the Reader and Chunking Strategy that made its Chunks. Uploading the same file under another one reads and chunks it again instead of skipping it as unchanged; Documents stored before there was a choice are read again when next uploaded.
+- Markdown and text files read the same whichever Reader is chosen.

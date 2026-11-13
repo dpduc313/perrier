@@ -30,6 +30,12 @@ def fake_embed(texts: list[str]) -> list[list[float]]:
     return [fake_embed_one(t) for t in texts]
 
 
+def wrong_size_embed(texts: list[str]) -> list[list[float]]:
+    """Embeddings Postgres refuses to store ("expected N dimensions"), so the write fails
+    after every model call has succeeded."""
+    return [[1.0, 0.0, 0.0] for _ in texts]
+
+
 @dataclass(frozen=True)
 class ToolCall:
     """A scripted reply that calls a tool (e.g. an Agent) instead of answering."""
@@ -144,9 +150,8 @@ class FakeVision:
     test: something was sent for transcription that nobody expected.
     """
 
-    model = "fake-vision"
-
-    def __init__(self, *replies: str | Exception):
+    def __init__(self, *replies: str | Exception, model: str = "fake-vision"):
+        self.model = model
         self.replies = list(replies)
         self.images: list[tuple[bytes, str]] = []
 
@@ -240,6 +245,7 @@ def fake_provider(
     speech: bool = True,
     local: bool = False,
     vision: FakeVision | None = None,
+    page_reader: FakeVision | None = None,
     summary: FakeSummaryModel | None = None,
     colbert: FakeColbert | None = None,
     reranker: FakeReranker | None = None,
@@ -247,7 +253,8 @@ def fake_provider(
     """Fake models; `local=True` makes text generation count as local (for privacy checks).
     Only with a `summary` model can the provider write Summaries. Without `colbert`,
     ingestion leaves the ColBERT index alone (and skips loading torch). Without
-    `reranker`, searches aren't reranked."""
+    `reranker`, searches aren't reranked. Without `page_reader`, there is no vision
+    Reader (as without OPENAI_API_KEY)."""
     vision = vision or FakeVision()
     return Provider(
         chat_model=lambda: chat,
@@ -258,6 +265,8 @@ def fake_provider(
         synthesize=fake_synthesize if speech else None,
         read_image=vision,
         vision_model=vision.model,
+        read_page_as_markdown=page_reader,
+        page_reader_model=page_reader.model if page_reader else "unknown",
         local_text_generation=local,
         summary_model=(lambda: summary) if summary else None,
         summary_model_name=summary.model if summary else "unknown",

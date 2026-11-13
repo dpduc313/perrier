@@ -3,7 +3,10 @@
 import pytest
 
 from benchmark.run import (
+    Ingested,
+    RetrievalRun,
     answer_all,
+    comparison_report,
     load_answers,
     render_report,
     retrieval_report,
@@ -107,3 +110,26 @@ def test_without_a_reranker_the_retrieval_report_shows_hybrid_search_alone():
 
     assert "| lookup | 2 | 50% | 1/2 |" in report
     assert "Reranked" not in report
+
+
+def test_the_comparison_shows_one_row_per_reader_and_chunking():
+    every_page = {"L1": {"a.pdf#page=1"}, "L2": {"a.pdf#page=3"}, "M1": {"b.pdf#page=2"}}
+    runs = [
+        RetrievalRun(
+            "docling", "heading", "emb", Ingested(7, 7, 23, 41.6, 0.0), every_page, every_page
+        ),
+        RetrievalRun(
+            "vision",
+            "fixed",
+            "emb",
+            Ingested(7, 0, 25, 0.0, 0.0213),
+            {"L1": set(), "L2": set(), "M1": set()},
+            None,
+        ),
+    ]
+
+    report = comparison_report(QUESTIONS, runs)
+
+    assert "| docling | heading | 23 | 42 s | $0.0000 | 100% | 3/3 | 100% | 3/3 |" in report
+    # Already stored that way, so no ingest time; no reranker, so no reranked recall.
+    assert "| vision | fixed | 25 | - | $0.0213 | 0% | 0/3 | - | - |" in report

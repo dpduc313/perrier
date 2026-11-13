@@ -27,6 +27,7 @@ dependencies = [
     "argon2-cffi>=25.1.0",
     "itsdangerous>=2.2.0",
     "tzlocal>=5.4.4",
+    "docling>=2.150.0",
 ]
 
 # ColBERT runs on the CPU: without this, uv pulls the ~2.5 GB CUDA build of torch.

@@ -9,6 +9,7 @@ toward the daily cap and is refused, before any model call, if it would exceed i
 import argparse
 import logging
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -16,6 +17,8 @@ from pgvector import Vector
 
 from perry import colbert, db, models, raptor, reembed, summaries, usage
 from perry.documents import (
+    CHUNKING,
+    READER,
     Chunk,
     ParsedDocument,
     content_hash,
@@ -96,24 +99,49 @@ class IngestionEstimate:
         return message + "."
 
 
-def estimate_file(path: Path) -> list[EstimatedCall] | None:
+@dataclass(frozen=True)
+class _PageReading:
+    """How a Document's pages_to_read are read: the call, and how the ledger records it."""
+
+    kind: str
+    model: str
+    read: Callable[[bytes, str], str]
+
+
+def _page_reading(parsed: ParsedDocument) -> _PageReading | None:
+    """The vision Reader for every page of a PDF read with it, else the vision model for
+    pages without text; None if the provider has neither."""
+    if parsed.read_by_vision_reader:
+        if not models.page_reader_supported():
+            return None
+        return _PageReading(
+            "page_reading", models.page_reader_model(), models.read_page_as_markdown
+        )
+    if not models.vision_supported():
+        return None
+    return _PageReading("transcription", models.vision_model(), models.transcribe_page)
+
+
+def estimate_file(
+    path: Path, chunking: str | None = None, reader: str | None = None
+) -> list[EstimatedCall] | None:
     """The model calls ingesting `path` would make, or None if it is unchanged and skipped.
 
     Every ingestion step that calls a model adds its calls here, so the estimate
     and the budget check cover it.
     """
-    if _unchanged(path):
+    if _unchanged(path, chunking, reader):
         return None
-    parsed = parse(path)
+    parsed = parse(path, chunking, reader)
     calls: list[EstimatedCall] = []
     embedding_tokens = models.estimate_tokens([chunk.text for chunk in parsed.chunks])
-    if models.vision_supported():
-        # One call per page without text; what it reads off the page is embedded too.
-        for _ in parsed.pages_without_text:
+    if reading := _page_reading(parsed):
+        # One call per page to read; what it reads off the page is embedded too.
+        for _ in parsed.pages_to_read:
             calls.append(
                 EstimatedCall(
-                    "transcription",
-                    models.vision_model(),
+                    reading.kind,
+                    reading.model,
                     models.PAGE_TRANSCRIPTION_INPUT_TOKENS,
                     models.PAGE_TRANSCRIPTION_OUTPUT_TOKENS,
                 )
@@ -126,18 +154,20 @@ def estimate_file(path: Path) -> list[EstimatedCall] | None:
     return calls
 
 
-def estimate_background(path: Path) -> list[EstimatedCall]:
+def estimate_background(
+    path: Path, chunking: str | None = None, reader: str | None = None
+) -> list[EstimatedCall]:
     """The model calls made in the background after ingesting `path`: its Summary on
     the local model, then embedding the Summary; its RAPTOR tree's node Summaries on the
-    local model, then embedding them. Pages without text count as the vision model will
-    read them at upload. (The cross-Document level is `estimate_cross_document`'s.)"""
+    local model, then embedding them. Pages a vision model reads count as it will read
+    them at upload. (The cross-Document level is `estimate_cross_document`'s.)"""
     if not models.summaries_supported():
         return []
-    parsed = parse(path)
+    parsed = parse(path, chunking, reader)
     chunks = [chunk.text for chunk in parsed.chunks]
     transcribed = (
-        [models.PAGE_TRANSCRIPTION_OUTPUT_TOKENS] * len(parsed.pages_without_text)
-        if models.vision_supported()
+        [models.PAGE_TRANSCRIPTION_OUTPUT_TOKENS] * len(parsed.pages_to_read)
+        if _page_reading(parsed)
         else []
     )
     # The Summary reads at most the start of the Document (summaries.INPUT_CHARS).
@@ -204,12 +234,19 @@ def estimate_ingestion(paths: list[Path]) -> IngestionEstimate:
     return IngestionEstimate(len(paths), unchanged, tuple(calls), tuple(background))
 
 
-def _unchanged(path: Path) -> bool:
+def _unchanged(path: Path, chunking: str | None = None, reader: str | None = None) -> bool:
+    """Whether `path` is stored as it is now, read by the same Reader and split with the
+    same Chunking Strategy."""
     with db.pool().connection() as conn:
         row = conn.execute(
-            "SELECT content_hash FROM documents WHERE name = %s", (path.name,)
+            "SELECT content_hash, chunking, reader FROM documents WHERE name = %s", (path.name,)
         ).fetchone()
-    return row is not None and row["content_hash"] == content_hash(path)
+    return (
+        row is not None
+        and row["content_hash"] == content_hash(path)
+        and row["chunking"] == (chunking or CHUNKING)
+        and row["reader"] == (reader or READER)
+    )
 
 
 class DocumentNotFound(LookupError):
@@ -221,24 +258,36 @@ class NameTaken(ValueError):
 
 
 def ingest_file(
-    path: Path, *, embed=models.embed_documents, replaces: str | None = None
+    path: Path,
+    *,
+    embed=models.embed_documents,
+    replaces: str | None = None,
+    chunking: str | None = None,
+    reader: str | None = None,
 ) -> IngestResult:
-    """Ingest one Document. A Document with the same name is replaced; identical content is skipped.
+    """Ingest one Document. A Document with the same name is replaced; identical content
+    read by the same Reader and split with the same Chunking Strategy is skipped.
 
     `replaces` names an older version under another name (`report.pdf` for
-    `report-v2.pdf`), deleted in the same step. This doesn't check the daily cap: bulk
-    ingestion goes through `ingest_files`.
+    `report-v2.pdf`), deleted in the same step. `chunking` and `reader` are the Chunking
+    Strategy and Reader (PERRY_CHUNKING and PERRY_DOCUMENT_READER if None). This doesn't
+    check the daily cap: bulk ingestion goes through `ingest_files`.
     """
     if replaces == path.name:
         replaces = None
     if replaces is not None and not _exists(replaces):
         raise DocumentNotFound(replaces)
-    if _unchanged(path):
+    if _unchanged(path, chunking, reader):
         if replaces is not None:
             delete_document(replaces)
         return IngestResult(path.name, "unchanged")
 
-    parsed = parse(path)
+    parsed = parse(path, chunking, reader)
+    if parsed.read_by_vision_reader and not models.page_reader_supported():
+        # Otherwise every page would fail on its own and the Document be stored empty.
+        raise models.VisionUnavailable(
+            f"The vision reader needs OPENAI_API_KEY to read pages with {models.PAGE_READER_MODEL}."
+        )
     # Call the models before touching the database, so a failed call leaves the old version intact.
     transcribed, untranscribed = _transcribe_pages(path, parsed)
     chunks = sorted([*parsed.chunks, *transcribed], key=lambda chunk: chunk.page)
@@ -252,8 +301,9 @@ def ingest_file(
         if replaces is not None:
             _delete(conn, replaces)
         document_id = conn.execute(
-            "INSERT INTO documents (name, content_hash) VALUES (%s, %s) RETURNING id",
-            (parsed.name, parsed.content_hash),
+            "INSERT INTO documents (name, content_hash, chunking, reader) "
+            "VALUES (%s, %s, %s, %s) RETURNING id",
+            (parsed.name, parsed.content_hash, parsed.chunking, parsed.reader),
         ).fetchone()["id"]
         chunk_ids = [
             row["id"]
@@ -336,20 +386,24 @@ def _exists(name: str) -> bool:
 
 
 def _transcribe_pages(path: Path, parsed: ParsedDocument) -> tuple[list[Chunk], tuple[int, ...]]:
-    """Chunks of the pages without text (e.g. scanned pages), read by the vision model,
-    and the pages whose transcription failed."""
+    """Chunks of the pages a vision model reads (every page for the vision Reader, else
+    the pages without text, e.g. scanned pages), split with the Document's Chunking
+    Strategy, and the pages whose reading failed."""
+    reading = _page_reading(parsed)
+    if reading is None:
+        return [], tuple(parsed.pages_to_read)
     chunks: list[Chunk] = []
     failed: list[int] = []
-    for page in parsed.pages_without_text:
+    for page in parsed.pages_to_read:
         try:
-            text = models.transcribe_page(render_page(path, page), "image/png")
+            text = reading.read(render_page(path, page), "image/png")
         except usage.TurnTokenCeilingReached:
             raise
         except Exception:  # the rest of the Document is still worth storing
-            log.warning("Couldn't transcribe page %d of %s", page, path.name, exc_info=True)
+            log.warning("Couldn't read page %d of %s", page, path.name, exc_info=True)
             failed.append(page)
             continue
-        chunks.extend(page_chunks(page, text))
+        chunks.extend(page_chunks(page, text, parsed.chunking))
     return chunks, tuple(failed)
 
 

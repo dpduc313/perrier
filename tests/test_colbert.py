@@ -10,6 +10,7 @@ from fakes import (
     fake_embed_one,
     fake_provider,
     last_message,
+    wrong_size_embed,
 )
 
 from perry import models, techniques
@@ -24,10 +25,10 @@ def documents(database, tmp_path, monkeypatch):
     folder = tmp_path / "documents"
     folder.mkdir()
 
-    def add(name: str, text: str):
+    def add(name: str, text: str, embed=fake_embed):
         path = folder / name
         path.write_text(text, encoding="utf-8")
-        return ingest_file(path, embed=fake_embed)
+        return ingest_file(path, embed=embed)
 
     with models.use(fake_provider(ScriptedChatModel(), colbert=FakeColbert())):
         yield add
@@ -89,9 +90,9 @@ def test_a_failed_postgres_write_leaves_the_document_as_it_was_in_both(documents
     documents("plan.md", "The Kestrel launch is in March.")
     documents("hiking.md", "Trail notes: the ridge path is steep after the waterfall.")
 
-    # Postgres refuses text containing a NUL byte, after the new index has been built.
-    with pytest.raises(Exception, match="NUL"):
-        documents("plan.md", "The Kestrel launch moved to June.\x00")
+    # Postgres refuses embeddings of the wrong size, after the new index has been built.
+    with pytest.raises(Exception, match="dimensions"):
+        documents("plan.md", "The Kestrel launch moved to June.", embed=wrong_size_embed)
 
     assert colbert("Kestrel launch")[0].text == "The Kestrel launch is in March."
     assert hybrid("Kestrel launch")[0].text == "The Kestrel launch is in March."

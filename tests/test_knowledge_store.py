@@ -42,6 +42,41 @@ def test_unchanged_document_is_skipped(database, tmp_path):
     assert ingest_file(file, embed=fake_embed).status == "unchanged"
 
 
+def test_a_document_is_chunked_again_under_another_chunking(database, tmp_path):
+    file = tmp_path / "handbook.md"
+    file.write_text(
+        "# Handbook\n\n## Leave\n\nLeave is 12 days.\n\n## Overtime\n\nOvertime pays 150%.",
+        encoding="utf-8",
+    )
+    assert ingest_file(file, embed=fake_embed, chunking="heading").chunks == 2
+
+    assert ingest_file(file, embed=fake_embed, chunking="heading").status == "unchanged"
+    fixed = ingest_file(file, embed=fake_embed, chunking="fixed")
+
+    assert (fixed.status, fixed.chunks) == ("ingested", 1)
+
+
+def test_pages_read_by_the_vision_reader_are_cited_by_page_and_led_by_headings(
+    database, half_scanned_pdf
+):
+    reader = FakeVision(
+        "# Budget\n\nThe marketing budget for Q3 is 40,000 dollars.",
+        "# Invoice\n\nSigned invoice: the catering total is 1,234 euros.",
+        model="fake-page-reader",
+    )
+
+    with models.use(fake_provider(ScriptedChatModel(), page_reader=reader)):
+        ingest_file(half_scanned_pdf, embed=fake_embed, reader="vision")
+
+    hit = search("catering invoice")[0]
+    assert (hit.citation, hit.text) == (
+        "report.pdf#page=2",
+        "Invoice\nSigned invoice: the catering total is 1,234 euros.",
+    )
+    assert search("marketing budget")[0].citation == "report.pdf#page=1"
+    assert len(reader.images) == 2  # both pages, the one with a text layer too
+
+
 def test_reupload_with_same_name_replaces_the_document(database, tmp_path):
     file = tmp_path / "plan.md"
     file.write_text("The launch is in March.", encoding="utf-8")

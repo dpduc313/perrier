@@ -9,6 +9,7 @@ from fakes import (
     ScriptedChatModel,
     fake_embed,
     fake_provider,
+    wrong_size_embed,
 )
 
 from perry import ingest, models, raptor, summaries, techniques
@@ -134,10 +135,10 @@ def test_a_newer_version_under_a_new_name_replaces_the_old_one(library):
 
 
 def test_a_failed_replacement_keeps_the_old_version(library):
-    broken = library("report-v2.md", NEW + "\x00")  # Postgres refuses a NUL byte
+    new = library("report-v2.md", NEW)
 
-    with pytest.raises(Exception, match="NUL"):
-        ingest_file(broken, embed=fake_embed, replaces="report.md")
+    with pytest.raises(Exception, match="dimensions"):  # Postgres refuses the embeddings
+        ingest_file(new, embed=wrong_size_embed, replaces="report.md")
 
     assert all(OLD in texts for texts in found().values())
 

@@ -3,8 +3,11 @@
     uv run python -m benchmark.run qabot           # ingest + answer with QA-bot
     uv run python -m benchmark.run perry           # ingest + answer with Perry
     uv run python -m benchmark.run report          # score both -> results/RESULTS.md
-    uv run python -m benchmark.run perry-retrieval # no chat model: page recall of hybrid search,
-                                    # without and with reranking
+    uv run python -m benchmark.run perry-retrieval [--reader docling,pymupdf,vision]
+                                    [--chunking heading,fixed] [--yes]
+                                    # no chat model: page recall of hybrid search,
+                                    # without and with reranking, for each Reader and
+                                    # Chunking Strategy (vision: paid page reading)
     uv run python -m benchmark.run grid [--only SETUP,...] [--rerun] [--yes]
                                     # every Retrieval Technique forced and every picking
                                     # mode -> results/grid.jsonl and results/GRID.md
@@ -196,15 +199,47 @@ def _use_benchmark_database() -> None:
             conn.execute("CREATE DATABASE perry_benchmark")
 
 
-def ingest_perry() -> None:
+@dataclass(frozen=True)
+class Ingested:
+    """What ingesting the benchmark Documents with one Reader and Chunking Strategy took."""
+
+    documents: int
+    reread: int  # Documents read and chunked in this run, not already stored that way
+    chunks: int
+    seconds: float
+    reading_cost_usd: float  # vision model calls that read pages
+
+
+def ingest_perry(chunking: str | None = None, reader: str | None = None) -> Ingested:
+    """Ingest the benchmark Documents with `chunking` and `reader` (PERRY_CHUNKING and
+    PERRY_DOCUMENT_READER if None). Documents stored another way are read again."""
     _use_benchmark_database()
-    from perry import db
+    from perry import db, documents
     from perry.ingest import ensure_indexes_current, ingest_file
 
     db.init_schema()
     ensure_indexes_current()  # e.g. Documents stored before ColBERT or a model change
-    for path in sorted(DOCUMENTS_DIR.glob("*.pdf")):
-        print(ingest_file(path).describe(), flush=True)
+    paths = sorted(DOCUMENTS_DIR.glob("*.pdf"))
+    if (reader or documents.READER) == "docling":
+        documents.parse(paths[0], chunking, "docling")  # load Docling's models, untimed
+    documents.forget_parsed()  # time reading, not a previous run's kept result
+    with db.pool().connection() as conn:
+        since = conn.execute("SELECT now() AS now").fetchone()["now"]
+    started = time.monotonic()
+    results = []
+    for path in paths:
+        results.append(ingest_file(path, chunking=chunking, reader=reader))
+        print(results[-1].describe(), flush=True)
+    seconds = time.monotonic() - started
+    with db.pool().connection() as conn:
+        chunks = conn.execute("SELECT count(*) AS n FROM chunks").fetchone()["n"]
+        cost = conn.execute(
+            "SELECT coalesce(sum(cost_usd), 0) AS usd FROM usage_ledger "
+            "WHERE recorded_at >= %s AND kind IN ('page_reading', 'transcription')",
+            (since,),
+        ).fetchone()["usd"]
+    reread = sum(result.status == "ingested" for result in results)
+    return Ingested(len(paths), reread, chunks, seconds, float(cost))
 
 
 def run_perry(questions: list[Question]) -> None:
@@ -214,10 +249,30 @@ def run_perry(questions: list[Question]) -> None:
     answer_all(questions, knowledge.ask, answers_path("perry"))
 
 
-def run_perry_retrieval(questions: list[Question], limit: int = 6) -> str:
+@dataclass(frozen=True)
+class RetrievalRun:
+    """Page recall of hybrid search over the benchmark Documents as one Reader and
+    Chunking Strategy stored them: the Citations each question's top hits point at."""
+
+    reader: str
+    chunking: str
+    embedding_model: str
+    ingested: Ingested
+    plain: dict[str, set[str]]
+    reranked: dict[str, set[str]] | None
+
+    @property
+    def setup(self) -> str:
+        return f"{self.reader} reader, {self.chunking} chunking, {self.embedding_model}"
+
+
+def run_perry_retrieval(
+    questions: list[Question], chunking: str, reader: str, limit: int = 6
+) -> RetrievalRun:
     """Page recall of hybrid search alone: which required pages are in the top hits, as
-    hybrid search ranks them and, if there is a reranker, as it reranks a wider pool."""
-    ingest_perry()
+    hybrid search ranks them and, if there is a reranker, as it reranks a wider pool.
+    The Documents are read with `reader` and chunked with `chunking` first."""
+    ingested = ingest_perry(chunking, reader)
     from perry import models, techniques
     from perry.search import hybrid_search
 
@@ -233,7 +288,48 @@ def run_perry_retrieval(questions: list[Question], limit: int = 6) -> str:
             q.id: {hit.citation for hit in techniques.search(hybrid, q.question).hits}
             for q in questions
         }
-    return retrieval_report(questions, limit, plain, reranked)
+    return RetrievalRun(reader, chunking, models.embedding_model(), ingested, plain, reranked)
+
+
+def _recall(found: set[str], q: Question) -> float:
+    return len(found & set(q.pages)) / len(q.pages)
+
+
+def comparison_report(questions: list[Question], runs: list[RetrievalRun], limit: int = 6) -> str:
+    """One row per Reader and Chunking Strategy: page recall over every question, for
+    hybrid search's own top hits and reranked, with what reading the Documents took."""
+    lines = [
+        "# Perry retrieval: Readers and Chunking Strategies compared (no chat model)",
+        "",
+        (
+            f"Share of required source pages among the top {limit} hits, over all "
+            f"{len(questions)} benchmark questions. Ingest time counts reading, chunking and "
+            "embedding the Documents (- if they were already stored that way). Reading cost "
+            "is what the vision model charged to read pages."
+        ),
+        "",
+        (
+            "| Reader | Chunking | Chunks | Ingest time | Reading cost "
+            "| Hybrid search: page recall | Hybrid search: all pages found "
+            "| Reranked: page recall | Reranked: all pages found |"
+        ),
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for run in runs:
+        cells = []
+        for found in (run.plain, run.reranked):
+            if found is None:
+                cells += ["-", "-"]
+                continue
+            recalls = [_recall(found[q.id], q) for q in questions]
+            cells += [_pct(_mean(recalls)), f"{sum(r == 1.0 for r in recalls)}/{len(questions)}"]
+        ingested = run.ingested
+        took = f"{ingested.seconds:.0f} s" if ingested.reread == ingested.documents else "-"
+        lines.append(
+            f"| {run.reader} | {run.chunking} | {ingested.chunks} | {took} "
+            f"| ${ingested.reading_cost_usd:.4f} | {' | '.join(cells)} |"
+        )
+    return "\n".join(lines) + "\n"
 
 
 def retrieval_report(
@@ -241,16 +337,16 @@ def retrieval_report(
     limit: int,
     plain: dict[str, set[str]],
     reranked: dict[str, set[str]] | None,
+    setup: str = "",
 ) -> str:
     """The retrieval-only report: page recall per question type and per question, for
-    hybrid search's own top hits and, if given, the reranked ones."""
+    hybrid search's own top hits and, if given, the reranked ones. `setup` names what was
+    measured, e.g. the Chunking Strategy and embedding model."""
     runs = [("Hybrid search", plain)] + ([("Reranked", reranked)] if reranked else [])
-
-    def recall(found: set[str], q: Question) -> float:
-        return len(found & set(q.pages)) / len(q.pages)
+    recall = _recall
 
     lines = [
-        "# Perry retrieval only (no chat model)",
+        "# Perry retrieval only (no chat model)" + (f": {setup}" if setup else ""),
         "",
         (
             f"Share of required source pages among the top {limit} hits for the question as "
@@ -334,6 +430,70 @@ def run_qabot(questions: list[Question]) -> None:
     answer_all(questions, ask_qabot, answers_path("qabot"))
 
 
+def compare_retrieval(
+    questions: list[Question],
+    readers: list[str] | None,
+    chunkings: list[str] | None,
+    *,
+    yes: bool = False,
+    ask=input,
+) -> list[RetrievalRun]:
+    """`perry-retrieval` for every Reader and Chunking Strategy named (PERRY_DOCUMENT_READER
+    and PERRY_CHUNKING if None), each in turn, writing each one's report and, for more than
+    one, results/perry-retrieval-comparison.md. The vision Reader calls a paid model, so
+    its estimate is shown and an OK awaited (unless `yes`) first."""
+    _use_benchmark_database()
+    from perry import db, documents, models, usage
+
+    readers = readers or [documents.READER]
+    chunkings = chunkings or [documents.CHUNKING]
+    for kind, named, allowed in (
+        ("reader", readers, documents.READERS),
+        ("chunking", chunkings, documents.CHUNKINGS),
+    ):
+        for name in named:
+            if name not in allowed:
+                sys.exit(f"Unknown {kind} {name!r}: use {', '.join(allowed)}.")
+    db.init_schema()
+    if "vision" in readers:
+        if not models.page_reader_supported():
+            sys.exit(
+                f"Not started: the vision reader runs on {models.PAGE_READER_MODEL} and "
+                "OPENAI_API_KEY isn't set."
+            )
+        pages = sum(
+            len(documents.parse(path, chunkings[0], "vision").pages_to_read)
+            for path in sorted(DOCUMENTS_DIR.glob("*.pdf"))
+        )
+        reads = pages * len(chunkings)  # every Chunking Strategy reads the pages again
+        cost = reads * usage.cost(
+            models.page_reader_model(),
+            models.PAGE_TRANSCRIPTION_INPUT_TOKENS,
+            models.PAGE_TRANSCRIPTION_OUTPUT_TOKENS,
+        )
+        print(
+            f"The vision reader reads {reads} pages on {models.page_reader_model()}: "
+            f"about ${cost:.2f}.",
+            flush=True,
+        )
+        if not yes and ask("Go ahead? [y/N] ").strip().lower() not in ("y", "yes"):
+            sys.exit("Not started.")
+    RESULTS_DIR.mkdir(exist_ok=True)
+    runs = []
+    for reader in readers:
+        for chunking in chunkings:
+            run = run_perry_retrieval(questions, chunking, reader)
+            report = retrieval_report(questions, 6, run.plain, run.reranked, run.setup)
+            path = RESULTS_DIR / f"perry-retrieval-{reader}-{chunking}.md"
+            path.write_text(report, encoding="utf-8")
+            runs.append(run)
+    if len(runs) > 1:
+        report = comparison_report(questions, runs)
+        (RESULTS_DIR / "perry-retrieval-comparison.md").write_text(report, encoding="utf-8")
+    print(report)
+    return runs
+
+
 def run_grid(
     questions: list[Question],
     only: list[str] | None,
@@ -396,7 +556,21 @@ def main(argv: list[str]) -> None:
     )
     parser.add_argument("--rerun", action="store_true", help="grid: ask the selected setups afresh")
     parser.add_argument(
-        "--yes", action="store_true", help="grid: start without asking about the estimate"
+        "--yes",
+        action="store_true",
+        help="grid, perry-retrieval: start without asking about the estimate",
+    )
+    parser.add_argument(
+        "--reader",
+        help="perry-retrieval: comma-separated Readers to compare (docling, pymupdf, vision; "
+        "default PERRY_DOCUMENT_READER)",
+    )
+    parser.add_argument(
+        "--chunking",
+        help="perry-retrieval: comma-separated Chunking Strategies to compare (heading, "
+        "fixed; default PERRY_CHUNKING). Each combination's report goes to "
+        "results/perry-retrieval-<reader>-<chunking>.md, and with more than one, a summary "
+        "to results/perry-retrieval-comparison.md",
     )
     args = parser.parse_args(argv)
     command = args.command
@@ -411,10 +585,11 @@ def main(argv: list[str]) -> None:
     elif command == "qabot":
         run_qabot(questions)
     elif command == "perry-retrieval":
-        RESULTS_DIR.mkdir(exist_ok=True)
-        report = run_perry_retrieval(questions)
-        (RESULTS_DIR / "perry-retrieval.md").write_text(report, encoding="utf-8")
-        print(report)
+
+        def names(value: str | None) -> list[str] | None:
+            return [name.strip() for name in value.split(",")] if value else None
+
+        compare_retrieval(questions, names(args.reader), names(args.chunking), yes=args.yes)
     elif command == "report":
         answers = {system: load_answers(answers_path(system)) for system in SYSTEMS}
         report = render_report(questions, answers)

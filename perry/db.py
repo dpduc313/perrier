@@ -41,6 +41,11 @@ CREATE INDEX IF NOT EXISTS chunks_embedding_idx ON chunks USING hnsw (embedding 
 -- (perry.reembed); searches skip it until then.
 ALTER TABLE chunks ALTER COLUMN embedding DROP NOT NULL;
 CREATE INDEX IF NOT EXISTS chunks_tsv_idx ON chunks USING gin (tsv);
+-- The Reader the Document's text came from and the Chunking Strategy that split it
+-- (perry.documents): the same file uploaded under another one is read and chunked
+-- again. NULL: before there was a choice.
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS chunking text;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS reader text;
 
 -- Written in the background after upload (perry.summaries): the summarising status,
 -- and the Document metadata extracted with the Summary.

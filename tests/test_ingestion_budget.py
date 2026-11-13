@@ -155,3 +155,38 @@ def test_transcription_calls_are_recorded_in_the_usage_ledger(perry, prices, hal
     # The fake vision model reports 300 tokens in and 50 out per page.
     assert usage.today(kind="transcription").tokens == 350
     assert usage.today(kind="transcription").cost_usd == pytest.approx(0.03 + 0.01)
+
+
+def test_the_vision_reader_is_estimated_and_recorded_for_every_page(
+    perry, prices, half_scanned_pdf
+):
+    """With the vision Reader every page goes to the page reader, scanned or not, and
+    nothing to the vision model that reads pages without text."""
+    from fakes import FakeVision, fake_provider
+
+    from perry import ingest, models, usage
+
+    prices({"fake-page-reader": {"input": 100.0, "output": 200.0}})
+    reader = FakeVision(
+        "# Budget\n\nQ3: 40,000.", "# Invoice\n\nTotal: 1,234.", model="fake-page-reader"
+    )
+
+    with models.use(fake_provider(perry.model, page_reader=reader)):
+        estimate = ingest.estimate_file(half_scanned_pdf, reader="vision")
+        result = ingest.ingest_file(half_scanned_pdf, reader="vision")
+
+    assert [(c.kind, c.model) for c in estimate[:2]] == [("page_reading", "fake-page-reader")] * 2
+    assert result.chunks == 2
+    assert usage.today(kind="page_reading").tokens == 2 * 350
+    assert usage.today(kind="transcription").tokens == 0
+
+
+def test_the_vision_reader_without_its_model_stores_nothing(perry, half_scanned_pdf):
+    from fakes import fake_provider
+
+    from perry import ingest, models
+
+    with models.use(fake_provider(perry.model)), pytest.raises(models.VisionUnavailable):
+        ingest.ingest_file(half_scanned_pdf, reader="vision")
+
+    assert ingest.estimate_file(half_scanned_pdf, reader="vision") is not None  # not stored
