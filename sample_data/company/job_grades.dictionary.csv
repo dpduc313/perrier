@@ -1,0 +1,4 @@
+column,description,references
+,"One job grade, G1 (Fresher) to G7 (Giám đốc), with its monthly base salary band.",
+min_salary,"Lowest monthly base salary of the grade, VND.",
+max_salary,"Highest monthly base salary of the grade, VND.",

@@ -1,0 +1,3 @@
+column,description,references
+,One job title in one department at one job grade.,
+position_title,"The title, with the level in brackets for staff roles.",

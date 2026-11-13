@@ -1,0 +1,14 @@
+code,value,unit,effective_from,note
+personal_deduction,11000000.0,VND/tháng,2020-07-01,NQ 954/2020/UBTVQH14
+personal_deduction,15500000.0,VND/tháng,2026-01-01,NQ 110/2025/UBTVQH15
+dependent_deduction,4400000.0,VND/tháng,2020-07-01,NQ 954/2020/UBTVQH14
+dependent_deduction,6200000.0,VND/tháng,2026-01-01,NQ 110/2025/UBTVQH15
+base_reference_salary,2340000.0,VND/tháng,2024-07-01,Lương cơ sở
+base_reference_salary,2530000.0,VND/tháng,2026-07-01,NĐ 161/2026/NĐ-CP
+regional_minimum_wage_1,4960000.0,VND/tháng,2024-07-01,Lương tối thiểu vùng I
+regional_minimum_wage_1,5310000.0,VND/tháng,2026-01-01,NĐ 293/2025/NĐ-CP
+meal_allowance,730000.0,VND/tháng,2016-03-01,Chính sách công ty
+overtime_rate,1.5,hệ số,2016-03-01,Làm thêm ngày thường
+probation_salary_rate,0.85,hệ số,2016-03-01,Lương thử việc
+probation_days,60.0,ngày,2016-03-01,Thử việc trình độ cao đẳng trở lên
+insurance_min_worked_days,14.0,ngày,2016-03-01,Dưới mức này không đóng BH

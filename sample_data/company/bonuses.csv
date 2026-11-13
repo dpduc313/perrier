@@ -1,0 +1,190 @@
+bonus_id,employee_id,pay_period,bonus_type,amount,note
+1,6,2026-01,Thưởng doanh số quý,21300000,Doanh số Q4/2025
+2,53,2026-01,Thưởng doanh số quý,12900000,Doanh số Q4/2025
+3,56,2026-01,Thưởng doanh số quý,16300000,Doanh số Q4/2025
+4,57,2026-01,Thưởng doanh số quý,7400000,Doanh số Q4/2025
+5,58,2026-01,Thưởng doanh số quý,17000000,Doanh số Q4/2025
+6,59,2026-01,Thưởng doanh số quý,3200000,Doanh số Q4/2025
+7,60,2026-01,Thưởng doanh số quý,16200000,Doanh số Q4/2025
+8,61,2026-01,Thưởng doanh số quý,5000000,Doanh số Q4/2025
+9,62,2026-01,Thưởng doanh số quý,10400000,Doanh số Q4/2025
+10,63,2026-01,Thưởng doanh số quý,7900000,Doanh số Q4/2025
+11,65,2026-01,Thưởng doanh số quý,15700000,Doanh số Q4/2025
+12,66,2026-01,Thưởng doanh số quý,15300000,Doanh số Q4/2025
+13,68,2026-01,Thưởng doanh số quý,11600000,Doanh số Q4/2025
+14,70,2026-01,Thưởng doanh số quý,10500000,Doanh số Q4/2025
+15,1,2026-02,Thưởng Tết,99000000,Thưởng Tết 2026
+16,2,2026-02,Thưởng Tết,159800000,Thưởng Tết 2026
+17,3,2026-02,Thưởng Tết,25300000,Thưởng Tết 2026
+18,4,2026-02,Thưởng Tết,109800000,Thưởng Tết 2026
+19,5,2026-02,Thưởng Tết,64900000,Thưởng Tết 2026
+20,6,2026-02,Thưởng Tết,71000000,Thưởng Tết 2026
+21,7,2026-02,Thưởng Tết,60300000,Thưởng Tết 2026
+22,8,2026-02,Thưởng Tết,88000000,Thưởng Tết 2026
+23,9,2026-02,Thưởng Tết,60200000,Thưởng Tết 2026
+24,10,2026-02,Thưởng Tết,106800000,Thưởng Tết 2026
+25,11,2026-02,Thưởng Tết,69900000,Thưởng Tết 2026
+26,12,2026-02,Thưởng Tết,77100000,Thưởng Tết 2026
+27,13,2026-02,Thưởng Tết,26500000,Thưởng Tết 2026
+28,14,2026-02,Thưởng Tết,6500000,Thưởng Tết 2026 (theo thời gian làm việc)
+29,15,2026-02,Thưởng Tết,18100000,Thưởng Tết 2026
+30,16,2026-02,Thưởng Tết,34200000,Thưởng Tết 2026
+31,17,2026-02,Thưởng Tết,12000000,Thưởng Tết 2026
+32,18,2026-02,Thưởng Tết,10200000,Thưởng Tết 2026 (theo thời gian làm việc)
+33,19,2026-02,Thưởng Tết,40000000,Thưởng Tết 2026
+34,20,2026-02,Thưởng Tết,17100000,Thưởng Tết 2026
+35,21,2026-02,Thưởng Tết,23600000,Thưởng Tết 2026
+36,22,2026-02,Thưởng Tết,22400000,Thưởng Tết 2026
+37,23,2026-02,Thưởng Tết,4300000,Thưởng Tết 2026 (theo thời gian làm việc)
+38,24,2026-02,Thưởng Tết,22500000,Thưởng Tết 2026
+39,25,2026-02,Thưởng Tết,34200000,Thưởng Tết 2026
+40,26,2026-02,Thưởng Tết,15300000,Thưởng Tết 2026
+41,27,2026-02,Thưởng Tết,1100000,Thưởng Tết 2026 (theo thời gian làm việc)
+42,28,2026-02,Thưởng Tết,43400000,Thưởng Tết 2026
+43,29,2026-02,Thưởng Tết,10300000,Thưởng Tết 2026
+44,30,2026-02,Thưởng Tết,37900000,Thưởng Tết 2026
+45,31,2026-02,Thưởng Tết,25400000,Thưởng Tết 2026
+46,32,2026-02,Thưởng Tết,21400000,Thưởng Tết 2026
+47,33,2026-02,Thưởng Tết,16000000,Thưởng Tết 2026 (theo thời gian làm việc)
+48,34,2026-02,Thưởng Tết,11300000,Thưởng Tết 2026
+49,35,2026-02,Thưởng Tết,15200000,Thưởng Tết 2026
+50,36,2026-02,Thưởng Tết,16200000,Thưởng Tết 2026
+51,37,2026-02,Thưởng Tết,16500000,Thưởng Tết 2026
+52,38,2026-02,Thưởng Tết,17900000,Thưởng Tết 2026
+53,39,2026-02,Thưởng Tết,25500000,Thưởng Tết 2026
+54,40,2026-02,Thưởng Tết,35900000,Thưởng Tết 2026
+55,41,2026-02,Thưởng Tết,26500000,Thưởng Tết 2026
+56,42,2026-02,Thưởng Tết,37600000,Thưởng Tết 2026
+57,43,2026-02,Thưởng Tết,36000000,Thưởng Tết 2026
+58,44,2026-02,Thưởng Tết,35800000,Thưởng Tết 2026
+59,45,2026-02,Thưởng Tết,32000000,Thưởng Tết 2026
+60,46,2026-02,Thưởng Tết,37600000,Thưởng Tết 2026
+61,47,2026-02,Thưởng Tết,18200000,Thưởng Tết 2026
+62,48,2026-02,Thưởng Tết,29400000,Thưởng Tết 2026
+63,49,2026-02,Thưởng Tết,33800000,Thưởng Tết 2026
+64,50,2026-02,Thưởng Tết,16100000,Thưởng Tết 2026
+65,51,2026-02,Thưởng Tết,33000000,Thưởng Tết 2026
+66,52,2026-02,Thưởng Tết,13500000,Thưởng Tết 2026 (theo thời gian làm việc)
+67,53,2026-02,Thưởng Tết,42900000,Thưởng Tết 2026
+68,54,2026-02,Thưởng Tết,29800000,Thưởng Tết 2026
+69,55,2026-02,Thưởng Tết,16100000,Thưởng Tết 2026
+70,56,2026-02,Thưởng Tết,30300000,Thưởng Tết 2026 (theo thời gian làm việc)
+71,57,2026-02,Thưởng Tết,29400000,Thưởng Tết 2026
+72,58,2026-02,Thưởng Tết,36400000,Thưởng Tết 2026
+73,59,2026-02,Thưởng Tết,12300000,Thưởng Tết 2026 (theo thời gian làm việc)
+74,60,2026-02,Thưởng Tết,34800000,Thưởng Tết 2026
+75,61,2026-02,Thưởng Tết,24000000,Thưởng Tết 2026 (theo thời gian làm việc)
+76,62,2026-02,Thưởng Tết,22200000,Thưởng Tết 2026
+77,63,2026-02,Thưởng Tết,26400000,Thưởng Tết 2026
+78,64,2026-02,Thưởng Tết,48800000,Thưởng Tết 2026
+79,65,2026-02,Thưởng Tết,22500000,Thưởng Tết 2026
+80,66,2026-02,Thưởng Tết,21900000,Thưởng Tết 2026
+81,67,2026-02,Thưởng Tết,21300000,Thưởng Tết 2026
+82,68,2026-02,Thưởng Tết,33000000,Thưởng Tết 2026
+83,69,2026-02,Thưởng Tết,37400000,Thưởng Tết 2026
+84,70,2026-02,Thưởng Tết,22500000,Thưởng Tết 2026
+85,71,2026-02,Thưởng Tết,22200000,Thưởng Tết 2026
+86,72,2026-02,Thưởng Tết,34800000,Thưởng Tết 2026
+87,73,2026-02,Thưởng Tết,20700000,Thưởng Tết 2026
+88,74,2026-02,Thưởng Tết,14600000,Thưởng Tết 2026
+89,75,2026-02,Thưởng Tết,31400000,Thưởng Tết 2026
+90,76,2026-02,Thưởng Tết,20600000,Thưởng Tết 2026
+91,77,2026-02,Thưởng Tết,21000000,Thưởng Tết 2026
+92,78,2026-02,Thưởng Tết,53400000,Thưởng Tết 2026
+93,79,2026-02,Thưởng Tết,48100000,Thưởng Tết 2026
+94,80,2026-02,Thưởng Tết,31600000,Thưởng Tết 2026
+95,81,2026-02,Thưởng Tết,9000000,Thưởng Tết 2026
+96,82,2026-02,Thưởng Tết,17600000,Thưởng Tết 2026
+97,83,2026-02,Thưởng Tết,13000000,Thưởng Tết 2026
+98,84,2026-02,Thưởng Tết,21600000,Thưởng Tết 2026
+99,85,2026-02,Thưởng Tết,2800000,Thưởng Tết 2026 (theo thời gian làm việc)
+100,86,2026-02,Thưởng Tết,21200000,Thưởng Tết 2026
+101,87,2026-02,Thưởng Tết,47400000,Thưởng Tết 2026
+102,88,2026-02,Thưởng Tết,8500000,Thưởng Tết 2026 (theo thời gian làm việc)
+103,89,2026-02,Thưởng Tết,11200000,Thưởng Tết 2026
+104,90,2026-02,Thưởng Tết,13100000,Thưởng Tết 2026
+105,91,2026-02,Thưởng Tết,11000000,Thưởng Tết 2026
+106,92,2026-02,Thưởng Tết,19200000,Thưởng Tết 2026
+107,93,2026-02,Thưởng Tết,10400000,Thưởng Tết 2026 (theo thời gian làm việc)
+108,94,2026-02,Thưởng Tết,23300000,Thưởng Tết 2026
+109,95,2026-02,Thưởng Tết,23800000,Thưởng Tết 2026
+110,96,2026-02,Thưởng Tết,20300000,Thưởng Tết 2026 (theo thời gian làm việc)
+111,97,2026-02,Thưởng Tết,31000000,Thưởng Tết 2026
+112,98,2026-02,Thưởng Tết,16500000,Thưởng Tết 2026
+113,99,2026-02,Thưởng Tết,48400000,Thưởng Tết 2026
+114,100,2026-02,Thưởng Tết,1600000,Thưởng Tết 2026 (theo thời gian làm việc)
+115,23,2026-02,Thưởng dự án,11500000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+116,41,2026-02,Thưởng dự án,5500000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+117,42,2026-02,Thưởng dự án,7500000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+118,44,2026-02,Thưởng dự án,8500000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+119,46,2026-02,Thưởng dự án,11000000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+120,45,2026-03,Thưởng dự án,7500000,Hoàn thành dự án Hệ thống CRM nội bộ
+121,28,2026-03,Thưởng dự án,14500000,Hoàn thành dự án Hệ thống CRM nội bộ
+122,48,2026-03,Thưởng dự án,15000000,Hoàn thành dự án Hệ thống CRM nội bộ
+123,24,2026-03,Thưởng dự án,12500000,Hoàn thành dự án Hệ thống CRM nội bộ
+124,38,2026-03,Thưởng dự án,12000000,Hoàn thành dự án Hệ thống CRM nội bộ
+125,6,2026-04,Thưởng doanh số quý,22300000,Doanh số Q1/2026
+126,53,2026-04,Thưởng doanh số quý,31700000,Doanh số Q1/2026
+127,54,2026-04,Thưởng doanh số quý,8600000,Doanh số Q1/2026
+128,56,2026-04,Thưởng doanh số quý,10600000,Doanh số Q1/2026
+129,57,2026-04,Thưởng doanh số quý,5000000,Doanh số Q1/2026
+130,58,2026-04,Thưởng doanh số quý,8000000,Doanh số Q1/2026
+131,59,2026-04,Thưởng doanh số quý,3500000,Doanh số Q1/2026
+132,60,2026-04,Thưởng doanh số quý,7600000,Doanh số Q1/2026
+133,61,2026-04,Thưởng doanh số quý,9000000,Doanh số Q1/2026
+134,62,2026-04,Thưởng doanh số quý,8200000,Doanh số Q1/2026
+135,63,2026-04,Thưởng doanh số quý,8300000,Doanh số Q1/2026
+136,65,2026-04,Thưởng doanh số quý,11900000,Doanh số Q1/2026
+137,66,2026-04,Thưởng doanh số quý,11500000,Doanh số Q1/2026
+138,67,2026-04,Thưởng doanh số quý,11200000,Doanh số Q1/2026
+139,68,2026-04,Thưởng doanh số quý,5600000,Doanh số Q1/2026
+140,69,2026-04,Thưởng doanh số quý,18700000,Doanh số Q1/2026
+141,70,2026-04,Thưởng doanh số quý,8200000,Doanh số Q1/2026
+142,13,2026-04,Thưởng dự án,6000000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+143,30,2026-04,Thưởng dự án,11500000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+144,26,2026-04,Thưởng dự án,13500000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+145,49,2026-04,Thưởng dự án,6500000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+146,29,2026-04,Thưởng dự án,5000000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+147,50,2026-04,Thưởng dự án,12000000,Hoàn thành dự án Ứng dụng di động cho khách hàng
+148,25,2026-06,Thưởng dự án,4500000,Hoàn thành dự án Nâng cấp hệ thống giám sát
+149,21,2026-06,Thưởng dự án,3000000,Hoàn thành dự án Nâng cấp hệ thống giám sát
+150,4,2026-06,Thưởng dự án,11000000,Hoàn thành dự án Nâng cấp hệ thống giám sát
+151,50,2026-06,Thưởng dự án,11500000,Hoàn thành dự án Nâng cấp hệ thống giám sát
+152,45,2026-06,Thưởng dự án,7000000,Hoàn thành dự án Nâng cấp hệ thống giám sát
+153,42,2026-06,Thưởng dự án,7500000,Hoàn thành dự án Nâng cấp hệ thống giám sát
+154,6,2026-07,Thưởng doanh số quý,37100000,Doanh số Q2/2026
+155,53,2026-07,Thưởng doanh số quý,22600000,Doanh số Q2/2026
+156,54,2026-07,Thưởng doanh số quý,8600000,Doanh số Q2/2026
+157,56,2026-07,Thưởng doanh số quý,17600000,Doanh số Q2/2026
+158,57,2026-07,Thưởng doanh số quý,8200000,Doanh số Q2/2026
+159,58,2026-07,Thưởng doanh số quý,13300000,Doanh số Q2/2026
+160,59,2026-07,Thưởng doanh số quý,3500000,Doanh số Q2/2026
+161,62,2026-07,Thưởng doanh số quý,8200000,Doanh số Q2/2026
+162,63,2026-07,Thưởng doanh số quý,13900000,Doanh số Q2/2026
+163,64,2026-07,Thưởng doanh số quý,17600000,Doanh số Q2/2026
+164,65,2026-07,Thưởng doanh số quý,11900000,Doanh số Q2/2026
+165,67,2026-07,Thưởng doanh số quý,11200000,Doanh số Q2/2026
+166,68,2026-07,Thưởng doanh số quý,9200000,Doanh số Q2/2026
+167,69,2026-07,Thưởng doanh số quý,26200000,Doanh số Q2/2026
+168,70,2026-07,Thưởng doanh số quý,11400000,Doanh số Q2/2026
+169,101,2026-07,Thưởng doanh số quý,7900000,Doanh số Q2/2026
+170,36,2026-09,Thưởng giới thiệu ứng viên,5000000,Giới thiệu Trần Tuấn Thắng
+171,53,2026-10,Thưởng doanh số quý,22600000,Doanh số Q3/2026
+172,54,2026-10,Thưởng doanh số quý,8600000,Doanh số Q3/2026
+173,56,2026-10,Thưởng doanh số quý,10600000,Doanh số Q3/2026
+174,57,2026-10,Thưởng doanh số quý,5000000,Doanh số Q3/2026
+175,58,2026-10,Thưởng doanh số quý,8000000,Doanh số Q3/2026
+176,59,2026-10,Thưởng doanh số quý,3500000,Doanh số Q3/2026
+177,60,2026-10,Thưởng doanh số quý,17600000,Doanh số Q3/2026
+178,63,2026-10,Thưởng doanh số quý,13900000,Doanh số Q3/2026
+179,65,2026-10,Thưởng doanh số quý,7100000,Doanh số Q3/2026
+180,67,2026-10,Thưởng doanh số quý,11200000,Doanh số Q3/2026
+181,68,2026-10,Thưởng doanh số quý,9200000,Doanh số Q3/2026
+182,69,2026-10,Thưởng doanh số quý,26200000,Doanh số Q3/2026
+183,70,2026-10,Thưởng doanh số quý,4900000,Doanh số Q3/2026
+184,105,2026-10,Thưởng doanh số quý,8400000,Doanh số Q3/2026
+185,51,2026-10,Thưởng dự án,13500000,Hoàn thành dự án Trợ lý ảo chăm sóc khách hàng
+186,39,2026-10,Thưởng dự án,7000000,Hoàn thành dự án Trợ lý ảo chăm sóc khách hàng
+187,4,2026-10,Thưởng dự án,3500000,Hoàn thành dự án Trợ lý ảo chăm sóc khách hàng
+188,13,2026-10,Thưởng dự án,8000000,Hoàn thành dự án Trợ lý ảo chăm sóc khách hàng
+189,34,2026-10,Thưởng dự án,6000000,Hoàn thành dự án Trợ lý ảo chăm sóc khách hàng

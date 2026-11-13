@@ -1,0 +1,4 @@
+column,description,references
+,One department or division of the company; departments nest in a tree.,
+parent_department_id,"The department this one sits under; empty for Ban Giám đốc, the top. Khối Kỹ thuật's children are the engineering departments.",departments.department_id
+cost_center,The accounting cost centre the department's costs are booked to.,

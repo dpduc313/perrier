@@ -1,0 +1,6 @@
+column,description,references
+,One degree or certificate held by one employee.,
+record_type,Bằng cấp (a degree) or Chứng chỉ (a certificate).,
+degree_level,Level of the degree (Thạc sĩ is a master's); Chứng chỉ for a certificate.,
+major,"The field studied, or the certificate's name.",
+graduation_year,Year the degree or certificate was obtained.,

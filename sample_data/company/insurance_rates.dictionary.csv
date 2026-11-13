@@ -1,0 +1,7 @@
+column,description,references
+,"The rates of one compulsory insurance (BHXH social, BHYT health, BHTN unemployment) over one period.",
+employee_rate,Share of the insurance salary deducted from the employee.,
+employer_rate,Share of the insurance salary the company pays on top.,
+salary_cap,"Monthly insurance salary above which nothing more is paid, VND.",
+effective_from,First day the rates apply (ISO date text).,
+effective_to,Last day the rates apply; empty while still in force.,

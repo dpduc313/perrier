@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.gradio/
+.env
+benchmark/.storage/
+scripts/results/
+google_client.json
+
+# Saved eval runs (python -m evals)
+evals/runs/

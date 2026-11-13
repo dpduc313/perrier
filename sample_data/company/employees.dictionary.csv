@@ -1,0 +1,11 @@
+column,description,references
+,"One person ever employed, including those who left.",
+employee_code,The HR code shown on documents (NV0001).,
+hometown_province,"The province the person comes from, not where they work.",
+termination_date,Last day employed; empty while still employed.,
+status,Đang làm việc (still employed) or Đã nghỉ việc (left the company).,
+employment_type,Chính thức (permanent) or Thử việc (still on probation).,
+position_id,"The latest position held (the one at leaving, for leavers).",
+manager_id,The employee's line manager; empty only for the Tổng Giám đốc.,employees.employee_id
+work_location,The office the person works in.,
+num_dependents,Dependents registered for the personal income tax deduction.,

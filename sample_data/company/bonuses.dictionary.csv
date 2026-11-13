@@ -1,0 +1,5 @@
+column,description,references
+,One bonus paid to one employee.,
+pay_period,Month the bonus is paid in (YYYY-MM); it adds to that month's payroll bonus_total.,
+amount,"Bonus paid, VND, before tax.",
+note,"What the bonus is for, such as the quarter or project.",

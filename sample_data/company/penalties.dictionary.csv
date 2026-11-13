@@ -1,0 +1,6 @@
+column,description,references
+,One disciplinary action against one employee.,
+incident_date,Day of the incident (ISO date text).,
+pay_period,Month any deduction is taken from pay (YYYY-MM).,
+penalty_type,"Khiển trách (a reprimand), Kéo dài thời hạn nâng lương (cancels an April raise due within six months) or Bồi thường thiệt hại tài sản (compensation for damaged property).",
+deduction_amount,"Taken from net pay, VND; 0 except for Bồi thường thiệt hại tài sản.",

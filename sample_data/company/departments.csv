@@ -1,0 +1,10 @@
+department_id,department_name,parent_department_id,cost_center
+1,Ban Giám đốc,,CC-100
+2,Khối Kỹ thuật,1,CC-200
+3,Phòng Phát triển phần mềm,2,CC-210
+4,Phòng Hạ tầng và Vận hành,2,CC-220
+5,Phòng Kinh doanh,1,CC-300
+6,Phòng Marketing,1,CC-400
+7,Phòng Chăm sóc khách hàng,1,CC-500
+8,Phòng Nhân sự,1,CC-600
+9,Phòng Tài chính - Kế toán,1,CC-700

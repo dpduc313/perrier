@@ -1,0 +1,6 @@
+column,description,references
+,One performance review of one employee.,
+review_period,"The period reviewed: a year (2025) for the January review, or a half (2026-H1) for the July review.",
+review_date,Day the review took place (ISO date text).,
+rating,From 1 (poor) to 5 (outstanding).,
+reviewer_id,The employee who gave the review; empty for the Tổng Giám đốc's own review.,employees.employee_id

@@ -1,0 +1,7 @@
+column,description,references
+,One bracket of the progressive personal income tax on monthly taxable income. A set of brackets applies from its effective_from until a later set starts.,
+bracket_no,"The bracket's order within its set, from 1 (lowest).",
+lower_bound,"Monthly taxable income where the bracket starts, VND.",
+upper_bound,"Where the bracket ends, VND; empty for the top bracket.",
+rate,"Tax rate on the income within the bracket, as a fraction.",
+effective_from,First day the set of brackets applies (ISO date text).,

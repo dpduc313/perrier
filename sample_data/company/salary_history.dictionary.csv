@@ -1,0 +1,8 @@
+column,description,references
+,"One change of an employee's pay or position, effective from a date until their next row.",
+effective_date,First day the pay applies (ISO date text).,
+position_id,The position held from that date.,
+base_salary,"Monthly base salary, VND.",
+position_allowance,"Monthly allowance of the position, VND.",
+meal_allowance,"Monthly meal allowance, VND.",
+reason,"Why the pay changed: hiring, end of probation, the April review, or a promotion.",

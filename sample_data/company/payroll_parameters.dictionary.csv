@@ -1,0 +1,7 @@
+column,description,references
+,One value of one payroll parameter from a date on; a later row for the same code replaces it.,
+code,"Which parameter: deductions, reference salaries, allowances and rates.",
+value,"The parameter's value, in its unit.",
+unit,"VND/tháng is VND per month, hệ số a multiplier, ngày days.",
+effective_from,First day the value applies (ISO date text).,
+note,The legal source or policy behind the value.,

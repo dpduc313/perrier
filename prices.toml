@@ -1,0 +1,62 @@
+# Price table for the usage ledger: USD per million tokens, per model.
+# Read on every model call, so edits apply without a restart. Past calls keep the
+# cost they were recorded with. A model missing here is recorded at cost 0.
+# Point PERRY_PRICES_FILE at another file to use a different table.
+#
+# These are what you really pay, so the Daily Cap counts real money: Gemini runs on the
+# free tier (0), local models cost nothing, and only the paid OpenAI models count.
+
+# --- Gemini, free tier (paid-tier list prices in comments, https://ai.google.dev/pricing)
+
+[models."gemini-3.8-flash"]
+input_per_million = 0       # paid tier: 0.30
+output_per_million = 0      # paid tier: 2.50, including thinking tokens
+
+# A lighter alternative (PERRY_LLM_MODEL=gemini-3.5-flash-lite).
+[models."gemini-3.5-flash-lite"]
+input_per_million = 0
+output_per_million = 0
+
+# Reads voice answers aloud: input is text, output is audio tokens.
+# (Speech-to-text runs on the chat model above.)
+[models."gemini-2.5-flash-preview-tts"]
+input_per_million = 0       # paid tier: 0.50
+output_per_million = 0      # paid tier: 10.00
+
+# --- OpenAI, paid: the fallback chat model and the benchmark's model.
+# Check against https://developers.openai.com/api/docs/models (output includes reasoning).
+
+[models."gpt-5.4-mini"]
+input_per_million = 0.75
+output_per_million = 4.50
+
+[models."gpt-5.4-nano"]
+input_per_million = 0.20
+output_per_million = 1.25
+
+# --- The company's own model (inet-qwen, PERRY_INET_QWEN_MODEL), self-hosted: knowledge
+# work runs on it first (docs/adr/0006). It costs Perry nothing.
+
+[models."knowledge"]
+input_per_million = 0
+output_per_million = 0
+
+# --- Local models: run on this machine, so free, but recorded like every model call.
+# Add a zero entry like these if you switch to another local model.
+
+# Embeddings (Ollama, PERRY_EMBEDDING_MODEL).
+[models."nomic-embed-text"]
+input_per_million = 0
+
+# Summaries, Document metadata and RAPTOR (Ollama, PERRY_SUMMARY_MODEL).
+[models."qwen3:8b"]
+input_per_million = 0
+output_per_million = 0
+
+# ColBERT.
+[models."answerdotai/answerai-colbert-small-v1"]
+input_per_million = 0
+
+# Reranking (PERRY_RERANK_MODEL).
+[models."cross-encoder/ms-marco-MiniLM-L6-v2"]
+input_per_million = 0

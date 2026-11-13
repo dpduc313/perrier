@@ -1,0 +1,46 @@
+position_id,position_title,department_id,grade_id
+1,Tổng Giám đốc,1,7
+2,Giám đốc Kỹ thuật,2,7
+3,Trợ lý Tổng Giám đốc,1,3
+4,Trưởng phòng Phát triển phần mềm,3,6
+5,Trưởng phòng Hạ tầng và Vận hành,4,6
+6,Trưởng phòng Kinh doanh,5,6
+7,Trưởng phòng Marketing,6,6
+8,Trưởng phòng Chăm sóc khách hàng,7,6
+9,Trưởng phòng Nhân sự,8,6
+10,Kế toán trưởng,9,6
+11,Lập trình viên (Fresher),3,1
+12,Lập trình viên (Junior),3,2
+13,Lập trình viên (Middle),3,3
+14,Lập trình viên (Senior),3,4
+15,Kiểm thử viên (Fresher),3,1
+16,Kiểm thử viên (Junior),3,2
+17,Kiểm thử viên (Middle),3,3
+18,Kiểm thử viên (Senior),3,4
+19,Kỹ sư hệ thống (Fresher),4,1
+20,Kỹ sư hệ thống (Junior),4,2
+21,Kỹ sư hệ thống (Middle),4,3
+22,Kỹ sư hệ thống (Senior),4,4
+23,Chuyên viên kinh doanh (Fresher),5,1
+24,Chuyên viên kinh doanh (Junior),5,2
+25,Chuyên viên kinh doanh (Middle),5,3
+26,Chuyên viên kinh doanh (Senior),5,4
+27,Chuyên viên marketing (Fresher),6,1
+28,Chuyên viên marketing (Junior),6,2
+29,Chuyên viên marketing (Middle),6,3
+30,Chuyên viên marketing (Senior),6,4
+31,Nhân viên chăm sóc khách hàng (Fresher),7,1
+32,Nhân viên chăm sóc khách hàng (Junior),7,2
+33,Nhân viên chăm sóc khách hàng (Middle),7,3
+34,Nhân viên chăm sóc khách hàng (Senior),7,4
+35,Chuyên viên nhân sự (Fresher),8,1
+36,Chuyên viên nhân sự (Junior),8,2
+37,Chuyên viên nhân sự (Middle),8,3
+38,Chuyên viên nhân sự (Senior),8,4
+39,Kế toán viên (Fresher),9,1
+40,Kế toán viên (Junior),9,2
+41,Kế toán viên (Middle),9,3
+42,Kế toán viên (Senior),9,4
+43,Trưởng nhóm phát triển,3,5
+44,Trưởng nhóm kinh doanh,5,5
+45,Trưởng nhóm chăm sóc khách hàng,7,5

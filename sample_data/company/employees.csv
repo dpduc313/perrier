@@ -1,0 +1,108 @@
+employee_id,employee_code,full_name,gender,birth_date,hometown_province,email,hire_date,termination_date,status,employment_type,position_id,manager_id,work_location,num_dependents
+1,NV0001,Lê Hoàng Thành,Nam,1975-02-04,Lâm Đồng,thanh.lh@perrytech.example,2021-02-10,,Đang làm việc,Chính thức,1,,TP. Hồ Chí Minh,1
+2,NV0002,Võ Đức Lâm,Nam,1972-04-18,Lào Cai,lam.vd@perrytech.example,2018-06-03,,Đang làm việc,Chính thức,2,1,Hà Nội,0
+3,NV0003,Trịnh Quang Huy,Nam,1987-08-16,Nghệ An,huy.tq@perrytech.example,2019-03-13,,Đang làm việc,Chính thức,3,1,TP. Hồ Chí Minh,2
+4,NV0004,Lý Ngọc Việt,Nam,1981-04-10,Nghệ An,viet.ln@perrytech.example,2017-10-06,,Đang làm việc,Chính thức,4,2,TP. Hồ Chí Minh,1
+5,NV0005,Huỳnh Quang Thắng,Nam,1981-10-08,Gia Lai,thang.hq@perrytech.example,2016-07-19,,Đang làm việc,Chính thức,5,2,TP. Hồ Chí Minh,1
+6,NV0006,Nguyễn Trọng Hải,Nam,1985-09-07,Quảng Trị,hai.nt@perrytech.example,2020-05-18,,Đang làm việc,Chính thức,6,1,TP. Hồ Chí Minh,3
+7,NV0007,Võ Ngọc An,Nam,1975-09-10,Lâm Đồng,an.vn@perrytech.example,2019-08-05,,Đang làm việc,Chính thức,7,1,Hà Nội,2
+8,NV0008,Phan Thanh Quyên,Nữ,1973-05-17,Hà Tĩnh,quyen.pt@perrytech.example,2017-09-29,,Đang làm việc,Chính thức,8,1,Hà Nội,2
+9,NV0009,Hoàng Hữu Huy,Nam,1973-08-18,Đồng Nai,huy.hh@perrytech.example,2018-01-13,,Đang làm việc,Chính thức,9,1,TP. Hồ Chí Minh,0
+10,NV0010,Trần Thị Yến,Nữ,1977-04-22,Thanh Hóa,yen.tt@perrytech.example,2016-11-17,,Đang làm việc,Chính thức,10,1,Hà Nội,1
+11,NV0011,Ngô Hồng Uyên,Nữ,1975-12-26,Thanh Hóa,uyen.nh@perrytech.example,2016-04-20,,Đang làm việc,Chính thức,43,4,Hà Nội,2
+12,NV0012,Bùi Quang Bình,Nam,1976-04-13,Bắc Ninh,binh.bq@perrytech.example,2017-11-16,,Đang làm việc,Chính thức,43,4,Hà Nội,0
+13,NV0013,Nguyễn Trọng Mạnh,Nam,1985-02-20,Thái Nguyên,manh.nt@perrytech.example,2016-10-23,,Đang làm việc,Chính thức,43,4,Hà Nội,2
+14,NV0014,Hoàng Phương Oanh,Nữ,2001-11-28,Đà Nẵng,oanh.hp@perrytech.example,2025-05-24,,Đang làm việc,Chính thức,11,11,TP. Hồ Chí Minh,0
+15,NV0015,Nguyễn Trọng Nghĩa,Nam,1995-09-27,Hà Nội,nghia.nt@perrytech.example,2021-07-05,,Đang làm việc,Chính thức,12,12,Hà Nội,0
+16,NV0016,Hoàng Trọng Phúc,Nam,1993-04-22,Hưng Yên,phuc.ht@perrytech.example,2020-11-28,,Đang làm việc,Chính thức,13,13,Hà Nội,0
+17,NV0017,Hoàng Văn Hải,Nam,1999-04-06,Đồng Tháp,hai.hv@perrytech.example,2024-11-13,,Đang làm việc,Chính thức,15,11,TP. Hồ Chí Minh,1
+18,NV0018,Phạm Ngọc Toàn,Nam,2000-03-24,Cà Mau,toan.pn@perrytech.example,2025-01-21,,Đang làm việc,Chính thức,11,12,TP. Hồ Chí Minh,0
+19,NV0019,Trần Ngọc Đạt,Nam,1995-03-08,Phú Thọ,dat.tn@perrytech.example,2023-01-28,,Đang làm việc,Chính thức,13,13,Hà Nội,2
+20,NV0020,Vũ Tuấn Tuấn,Nam,1999-06-10,An Giang,tuan.vt@perrytech.example,2022-02-13,,Đang làm việc,Chính thức,12,11,TP. Hồ Chí Minh,2
+21,NV0021,Ngô Trọng Bình,Nam,1988-10-19,Lâm Đồng,binh.nt@perrytech.example,2020-04-24,,Đang làm việc,Chính thức,13,12,Hà Nội,1
+22,NV0022,Trần Đức Tuấn,Nam,1993-12-18,TP. Hồ Chí Minh,tuan.td@perrytech.example,2019-05-15,,Đang làm việc,Chính thức,13,13,TP. Hồ Chí Minh,0
+23,NV0023,Huỳnh Thanh Huy,Nam,2003-03-10,Đà Nẵng,huy.ht@perrytech.example,2025-08-16,,Đang làm việc,Chính thức,15,11,TP. Hồ Chí Minh,0
+24,NV0024,Lê Phương Dung,Nữ,1986-11-11,Hà Nội,dung.lp@perrytech.example,2020-05-02,,Đang làm việc,Chính thức,17,12,TP. Hồ Chí Minh,2
+25,NV0025,Võ Ngọc Tuấn,Nam,1994-07-27,Tây Ninh,tuan.vn@perrytech.example,2020-12-05,,Đang làm việc,Chính thức,12,13,TP. Hồ Chí Minh,0
+26,NV0026,Lê Thanh Mạnh,Nam,1998-05-20,Đồng Nai,manh.lt@perrytech.example,2023-09-08,,Đang làm việc,Chính thức,16,11,TP. Hồ Chí Minh,1
+27,NV0027,Huỳnh Hữu Sơn,Nam,2000-09-17,Quảng Ninh,son.hh@perrytech.example,2025-11-24,2026-07-02,Đã nghỉ việc,Chính thức,11,12,Hà Nội,0
+28,NV0028,Nguyễn Mai Hoa,Nữ,1988-10-10,Đà Nẵng,hoa.nm@perrytech.example,2022-06-16,,Đang làm việc,Chính thức,17,13,TP. Hồ Chí Minh,0
+29,NV0029,Nguyễn Văn Nam,Nam,1985-08-15,Bắc Ninh,nam.nv@perrytech.example,2018-05-08,,Đang làm việc,Chính thức,17,11,Hà Nội,0
+30,NV0030,Phạm Trọng Long,Nam,1987-07-15,Lào Cai,long.pt@perrytech.example,2024-03-03,,Đang làm việc,Chính thức,14,12,Hà Nội,1
+31,NV0031,Nguyễn Mai Thảo,Nữ,1991-05-02,Thanh Hóa,thao.nm@perrytech.example,2024-08-22,,Đang làm việc,Chính thức,13,13,Hà Nội,0
+32,NV0032,Hoàng Hữu Hùng,Nam,1991-01-06,Đồng Tháp,hung.hh@perrytech.example,2018-07-18,,Đang làm việc,Chính thức,17,11,TP. Hồ Chí Minh,2
+33,NV0033,Nguyễn Đức Long,Nam,1999-11-27,Ninh Bình,long.nd@perrytech.example,2025-04-16,,Đang làm việc,Chính thức,17,12,Hà Nội,2
+34,NV0034,Trần Thanh Hải,Nam,2001-06-14,Đồng Nai,hai.tt@perrytech.example,2024-07-26,,Đang làm việc,Chính thức,11,13,TP. Hồ Chí Minh,0
+35,NV0035,Phạm Tuấn Dũng,Nam,1998-09-12,Đắk Lắk,dung.pt@perrytech.example,2022-08-07,,Đang làm việc,Chính thức,12,11,TP. Hồ Chí Minh,1
+36,NV0036,Nguyễn Ngọc An,Nam,1990-07-03,Thanh Hóa,an.nn@perrytech.example,2017-09-05,,Đang làm việc,Chính thức,12,12,TP. Hồ Chí Minh,2
+37,NV0037,Nguyễn Quang Hoàng,Nam,1993-02-09,An Giang,hoang.nq@perrytech.example,2022-10-22,,Đang làm việc,Chính thức,12,13,TP. Hồ Chí Minh,1
+38,NV0038,Phạm Ngọc Tài,Nam,1998-06-28,Nghệ An,tai.pn@perrytech.example,2024-09-07,,Đang làm việc,Chính thức,12,11,TP. Hồ Chí Minh,0
+39,NV0039,Hoàng Minh Việt,Nam,2000-03-17,Gia Lai,viet.hm@perrytech.example,2023-06-06,,Đang làm việc,Chính thức,12,12,TP. Hồ Chí Minh,0
+40,NV0040,Trần Tuấn Đạt,Nam,1990-11-28,Quảng Ngãi,dat.tt@perrytech.example,2024-08-27,,Đang làm việc,Chính thức,14,13,TP. Hồ Chí Minh,0
+41,NV0041,Trần Hữu Bình,Nam,1998-06-26,TP. Hồ Chí Minh,binh.th@perrytech.example,2024-12-06,,Đang làm việc,Chính thức,13,11,TP. Hồ Chí Minh,1
+42,NV0042,Nguyễn Hoàng Mạnh,Nam,1988-05-22,Hà Nội,manh.nh@perrytech.example,2021-11-10,,Đang làm việc,Chính thức,14,12,TP. Hồ Chí Minh,1
+43,NV0043,Nguyễn Tuấn Quân,Nam,1996-05-23,Hưng Yên,quan.nt@perrytech.example,2023-11-17,,Đang làm việc,Chính thức,12,13,Hà Nội,2
+44,NV0044,Nguyễn Hữu Hoàng,Nam,1997-11-21,TP. Hồ Chí Minh,hoang.nh@perrytech.example,2024-04-07,,Đang làm việc,Chính thức,17,11,TP. Hồ Chí Minh,1
+45,NV0045,Võ Hoàng Nam,Nam,1987-02-15,Hải Phòng,nam.vh@perrytech.example,2018-11-18,,Đang làm việc,Chính thức,21,5,Hà Nội,3
+46,NV0046,Huỳnh Trọng Tài,Nam,1991-02-22,Thanh Hóa,tai.ht@perrytech.example,2022-06-14,,Đang làm việc,Chính thức,21,5,Hà Nội,1
+47,NV0047,Nguyễn Mai Giang,Nữ,2002-04-18,Cần Thơ,giang.nm@perrytech.example,2024-10-19,2026-06-03,Đã nghỉ việc,Chính thức,19,5,TP. Hồ Chí Minh,0
+48,NV0048,Huỳnh Quang Trung,Nam,1995-04-28,Quảng Ninh,trung.hq@perrytech.example,2021-11-21,,Đang làm việc,Chính thức,20,5,Hà Nội,2
+49,NV0049,Nguyễn Thanh Lâm,Nam,1993-10-07,Hải Phòng,lam.nt@perrytech.example,2024-05-12,,Đang làm việc,Chính thức,22,5,TP. Hồ Chí Minh,1
+50,NV0050,Võ Đức Bình,Nam,1993-01-12,Đồng Tháp,binh.vd@perrytech.example,2017-05-02,,Đang làm việc,Chính thức,20,5,TP. Hồ Chí Minh,1
+51,NV0051,Lê Trọng Cường,Nam,1992-11-17,Hưng Yên,cuong.lt@perrytech.example,2020-07-07,,Đang làm việc,Chính thức,20,5,Hà Nội,3
+52,NV0052,Phạm Thanh Tài,Nam,1998-09-10,Lào Cai,tai.pt@perrytech.example,2025-02-10,,Đang làm việc,Chính thức,20,5,Hà Nội,1
+53,NV0053,Trần Hoàng Thắng,Nam,1981-12-04,Bắc Ninh,thang.th@perrytech.example,2018-09-11,,Đang làm việc,Chính thức,44,6,Hà Nội,2
+54,NV0054,Trần Minh Dũng,Nam,1997-09-18,Bắc Ninh,dung.tm@perrytech.example,2024-12-31,,Đang làm việc,Chính thức,24,53,Hà Nội,1
+55,NV0055,Nguyễn Đức Quân,Nam,1993-09-12,Đà Nẵng,quan.nd@perrytech.example,2022-03-01,2026-02-06,Đã nghỉ việc,Chính thức,24,53,TP. Hồ Chí Minh,1
+56,NV0056,Ngô Thanh An,Nam,1994-03-19,Lâm Đồng,an.nt@perrytech.example,2025-05-20,,Đang làm việc,Chính thức,26,53,TP. Hồ Chí Minh,0
+57,NV0057,Phạm Đức Dũng,Nam,1999-03-25,Đắk Lắk,dung.pd@perrytech.example,2023-06-30,,Đang làm việc,Chính thức,24,53,Hà Nội,0
+58,NV0058,Nguyễn Bảo Nga,Nữ,1986-11-10,TP. Hồ Chí Minh,nga.nb@perrytech.example,2020-09-26,,Đang làm việc,Chính thức,25,53,Hà Nội,3
+59,NV0059,Lê Hồng Hạnh,Nữ,2002-07-18,Đồng Nai,hanh.lh@perrytech.example,2025-03-25,,Đang làm việc,Chính thức,23,53,Hà Nội,0
+60,NV0060,Trần Hồng Thảo,Nữ,1990-05-04,Phú Thọ,thao.th@perrytech.example,2022-12-14,,Đang làm việc,Chính thức,25,53,Hà Nội,0
+61,NV0061,Nguyễn Minh Duy,Nam,1998-11-04,Quảng Trị,duy.nm@perrytech.example,2025-01-14,2026-06-05,Đã nghỉ việc,Chính thức,24,53,TP. Hồ Chí Minh,2
+62,NV0062,Phạm Ngọc Hạnh,Nữ,1995-11-16,Lào Cai,hanh.pn@perrytech.example,2024-03-26,,Đang làm việc,Chính thức,24,53,Hà Nội,2
+63,NV0063,Lê Minh Uyên,Nữ,1987-10-02,Quảng Ninh,uyen.lm@perrytech.example,2017-09-27,,Đang làm việc,Chính thức,25,53,Hà Nội,0
+64,NV0064,Phạm Thị My,Nữ,1986-11-07,Bắc Ninh,my.pt@perrytech.example,2024-12-22,,Đang làm việc,Chính thức,26,53,Hà Nội,1
+65,NV0065,Lê Thu Linh,Nữ,1993-05-13,Thái Nguyên,linh.lt@perrytech.example,2024-03-04,,Đang làm việc,Chính thức,25,53,Hà Nội,2
+66,NV0066,Đỗ Thanh Đạt,Nam,1993-06-10,Khánh Hòa,dat.dt@perrytech.example,2021-01-07,2026-06-05,Đã nghỉ việc,Chính thức,25,53,TP. Hồ Chí Minh,1
+67,NV0067,Tạ Ngọc Đạt,Nam,1992-09-12,Hà Nội,dat.tn2@perrytech.example,2024-10-15,,Đang làm việc,Chính thức,25,53,Hà Nội,0
+68,NV0068,Nguyễn Ngọc Cường,Nam,1996-06-25,Đắk Lắk,cuong.nn@perrytech.example,2024-09-27,,Đang làm việc,Chính thức,24,53,Hà Nội,1
+69,NV0069,Huỳnh Thanh My,Nữ,1986-05-25,Tây Ninh,my.ht@perrytech.example,2024-08-07,,Đang làm việc,Chính thức,26,53,TP. Hồ Chí Minh,0
+70,NV0070,Trần Hữu Tài,Nam,1997-09-14,Huế,tai.th@perrytech.example,2024-06-15,,Đang làm việc,Chính thức,24,53,TP. Hồ Chí Minh,2
+71,NV0071,Nguyễn Ngọc Trang,Nữ,1994-05-15,Quảng Trị,trang.nn@perrytech.example,2018-07-14,,Đang làm việc,Chính thức,28,7,Hà Nội,1
+72,NV0072,Nguyễn Thanh Anh,Nữ,1989-02-27,Đồng Nai,anh.nt@perrytech.example,2023-05-04,,Đang làm việc,Chính thức,30,7,TP. Hồ Chí Minh,2
+73,NV0073,Nguyễn Ngọc Anh,Nữ,1994-04-27,Cần Thơ,anh.nn@perrytech.example,2024-09-25,,Đang làm việc,Chính thức,29,7,TP. Hồ Chí Minh,2
+74,NV0074,Nguyễn Mai Oanh,Nữ,1996-01-21,Quảng Trị,oanh.nm@perrytech.example,2023-03-14,,Đang làm việc,Chính thức,28,7,TP. Hồ Chí Minh,2
+75,NV0075,Lý Thùy Ngân,Nữ,1987-09-01,Phú Thọ,ngan.lt@perrytech.example,2021-06-26,,Đang làm việc,Chính thức,30,7,TP. Hồ Chí Minh,0
+76,NV0076,Vũ Thu Chi,Nữ,1990-09-11,Vĩnh Long,chi.vt@perrytech.example,2021-07-28,,Đang làm việc,Chính thức,29,7,TP. Hồ Chí Minh,2
+77,NV0077,Nguyễn Quang Cường,Nam,1995-04-02,Bắc Ninh,cuong.nq@perrytech.example,2024-10-02,,Đang làm việc,Chính thức,28,7,TP. Hồ Chí Minh,1
+78,NV0078,Trần Đức Sơn,Nam,1988-07-24,Lào Cai,son.td@perrytech.example,2023-07-27,,Đang làm việc,Chính thức,30,7,TP. Hồ Chí Minh,1
+79,NV0079,Phan Đức Toàn,Nam,1977-03-18,Hưng Yên,toan.pd@perrytech.example,2017-08-29,,Đang làm việc,Chính thức,45,8,Hà Nội,0
+80,NV0080,Trần Thị Dung,Nữ,1988-06-17,Đồng Tháp,dung.tt@perrytech.example,2020-12-28,,Đang làm việc,Chính thức,33,79,TP. Hồ Chí Minh,0
+81,NV0081,Nguyễn Minh Trung,Nam,2000-06-15,An Giang,trung.nm@perrytech.example,2024-12-01,,Đang làm việc,Chính thức,31,79,Hà Nội,0
+82,NV0082,Lê Thùy Giang,Nữ,1984-05-23,Lào Cai,giang.lt@perrytech.example,2017-12-31,,Đang làm việc,Chính thức,34,79,Hà Nội,1
+83,NV0083,Đặng Phương Quyên,Nữ,1998-12-03,Quảng Ngãi,quyen.dp@perrytech.example,2023-01-16,,Đang làm việc,Chính thức,32,79,TP. Hồ Chí Minh,2
+84,NV0084,Nguyễn Ngọc Sơn,Nam,1991-09-05,Đắk Lắk,son.nn@perrytech.example,2024-06-02,,Đang làm việc,Chính thức,33,79,TP. Hồ Chí Minh,0
+85,NV0085,Nguyễn Mai Quyên,Nữ,2001-03-27,An Giang,quyen.nm@perrytech.example,2025-09-27,,Đang làm việc,Chính thức,31,79,TP. Hồ Chí Minh,0
+86,NV0086,Ngô Thanh Linh,Nữ,1988-05-28,Hải Phòng,linh.nt@perrytech.example,2022-07-29,2026-04-09,Đã nghỉ việc,Chính thức,33,79,Hà Nội,1
+87,NV0087,Hồ Phương Vân,Nữ,1984-01-27,Cà Mau,van.hp@perrytech.example,2022-02-22,,Đang làm việc,Chính thức,34,79,Hà Nội,0
+88,NV0088,Hoàng Minh Nga,Nữ,2001-11-13,Hưng Yên,nga.hm@perrytech.example,2025-05-16,,Đang làm việc,Chính thức,32,79,Hà Nội,0
+89,NV0089,Mai Phương Ly,Nữ,1996-06-17,Quảng Ngãi,ly.mp@perrytech.example,2024-09-16,2026-04-24,Đã nghỉ việc,Chính thức,33,79,Hà Nội,0
+90,NV0090,Hồ Thanh Phong,Nam,1995-03-16,Quảng Trị,phong.ht@perrytech.example,2019-07-27,,Đang làm việc,Chính thức,32,79,TP. Hồ Chí Minh,2
+91,NV0091,Đỗ Mai Hương,Nữ,1989-01-28,Đà Nẵng,huong.dm@perrytech.example,2023-08-05,,Đang làm việc,Chính thức,37,9,TP. Hồ Chí Minh,2
+92,NV0092,Lê Thùy Hoa,Nữ,1997-03-04,Phú Thọ,hoa.lt@perrytech.example,2024-06-14,,Đang làm việc,Chính thức,37,9,Hà Nội,3
+93,NV0093,Lê Minh Hoàng,Nam,2000-10-11,Huế,hoang.lm@perrytech.example,2025-04-19,,Đang làm việc,Chính thức,36,9,TP. Hồ Chí Minh,0
+94,NV0094,Trần Ngọc Mai,Nữ,1992-12-28,Đồng Nai,mai.tn@perrytech.example,2022-04-09,,Đang làm việc,Chính thức,37,9,TP. Hồ Chí Minh,1
+95,NV0095,Phạm Ngọc Hằng,Nữ,2000-08-11,Thái Nguyên,hang.pn@perrytech.example,2023-06-08,,Đang làm việc,Chính thức,40,10,Hà Nội,0
+96,NV0096,Nguyễn Mai Ngân,Nữ,1993-06-06,Lào Cai,ngan.nm@perrytech.example,2025-02-18,,Đang làm việc,Chính thức,41,10,TP. Hồ Chí Minh,0
+97,NV0097,Phạm Minh Hương,Nữ,1991-10-22,Quảng Ngãi,huong.pm@perrytech.example,2021-04-21,,Đang làm việc,Chính thức,42,10,TP. Hồ Chí Minh,3
+98,NV0098,Nguyễn Ngọc Minh,Nam,2001-02-20,Tây Ninh,minh.nn@perrytech.example,2024-08-08,,Đang làm việc,Chính thức,39,10,TP. Hồ Chí Minh,0
+99,NV0099,Phạm Thu Mai,Nữ,1991-08-21,Nghệ An,mai.pt@perrytech.example,2024-12-02,,Đang làm việc,Chính thức,41,10,Hà Nội,0
+100,NV0100,Đỗ Thu Yên,Nữ,2003-07-26,Hà Tĩnh,yen.dt@perrytech.example,2025-11-03,,Đang làm việc,Chính thức,39,10,Hà Nội,0
+101,NV0101,Vũ Trọng Hải,Nam,1997-09-06,Quảng Ninh,hai.vt@perrytech.example,2026-03-05,,Đang làm việc,Chính thức,24,53,Hà Nội,1
+102,NV0102,Vũ Mai Uyên,Nữ,1999-03-20,Thái Nguyên,uyen.vm@perrytech.example,2026-05-06,,Đang làm việc,Chính thức,33,79,Hà Nội,1
+103,NV0103,Nguyễn Đức Tài,Nam,1992-10-10,Huế,tai.nd@perrytech.example,2026-05-25,,Đang làm việc,Chính thức,33,79,Hà Nội,0
+104,NV0104,Nguyễn Hữu Long,Nam,2002-02-20,TP. Hồ Chí Minh,long.nh@perrytech.example,2026-06-26,,Đang làm việc,Chính thức,19,5,TP. Hồ Chí Minh,0
+105,NV0105,Trần Tuấn Thắng,Nam,1999-04-17,Hà Nội,thang.tt@perrytech.example,2026-06-24,,Đang làm việc,Chính thức,24,53,Hà Nội,0
+106,NV0106,Lê Thanh Hiếu,Nam,1992-05-18,Vĩnh Long,hieu.lt@perrytech.example,2026-07-15,,Đang làm việc,Chính thức,25,53,TP. Hồ Chí Minh,0
+107,NV0107,Tạ Hữu An,Nam,2002-04-07,Cà Mau,an.th@perrytech.example,2026-08-03,,Đang làm việc,Chính thức,11,12,TP. Hồ Chí Minh,0
