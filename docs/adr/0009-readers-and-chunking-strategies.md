@@ -13,3 +13,4 @@ We kept the old Reader and Chunking Strategy instead of replacing them because t
 - Reading a PDF with Docling runs its layout model on the CPU (a few seconds a page; its models download once). Uploads are slower than with pymupdf.
 - Each Document records the Reader and Chunking Strategy that made its Chunks. Uploading the same file under another one reads and chunks it again instead of skipping it as unchanged; Documents stored before there was a choice are read again when next uploaded.
 - Markdown and text files read the same whichever Reader is chosen.
+- The settings are the defaults. In the chat UI the Owner can pick another Reader or Chunking Strategy for an upload, then sees what it made in the Review before anything is stored (`GLOSSARY.md`), so a scanned PDF can go to the vision Reader without changing the setting for every other upload.

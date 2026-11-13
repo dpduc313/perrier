@@ -51,11 +51,14 @@ def test_other_users_dont_see_the_upload_and_workspace_controls(sam):
     assert visible(app.owner_controls(request_as(sam))) == [False] * len(app.OWNER_CONTROLS)
 
 
-def test_a_non_owner_cant_propose_or_ingest_a_document_upload(sam, notes):
+def test_a_non_owner_cant_propose_read_or_approve_a_document_upload(sam, notes):
     with pytest.raises(gr.Error, match="Only the Owner"):
         app.propose_upload(request_as(sam), notes)
     with pytest.raises(gr.Error, match="Only the Owner"):
-        app.ingest_upload(request_as(sam), notes)
+        app.read_upload(request_as(sam), notes)
+    read = [ingest.read_file(Path(notes[0]))]  # as if the Owner had read it for Review
+    with pytest.raises(gr.Error, match="Only the Owner"):
+        app.approve_review(request_as(sam), read)
 
     # Still new to Perry: nothing was ingested.
     assert ingest.estimate_ingestion([Path(file) for file in notes]).tokens > 0

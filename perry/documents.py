@@ -129,7 +129,7 @@ def _parse(path: Path, digest: str, chunking: str, reader: str) -> ParsedDocumen
     without_text = _pages_without_text(path)
     if is_pdf and reader == "vision":
         chunks: list[Chunk] = []
-        to_read = list(range(1, _page_count(path) + 1))
+        to_read = list(range(1, page_count(path) + 1))
     else:
         if not is_pdf or reader == "docling":
             chunks = _chunks(_convert(path, digest), chunking)
@@ -184,7 +184,10 @@ def _pymupdf_pages(path: Path) -> list[tuple[int, str]]:
         return [(number, page.get_text()) for number, page in enumerate(pdf, start=1)]
 
 
-def _page_count(path: Path) -> int:
+def page_count(path: Path) -> int:
+    """How many pages the file has: a PDF's page count; 1 for Markdown and text."""
+    if path.suffix.lower() != ".pdf":
+        return 1
     with pymupdf.open(path) as pdf:
         return pdf.page_count
 

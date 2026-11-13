@@ -82,12 +82,16 @@ A passage of a document that can be retrieved on its own and traced back to its 
 _Avoid_: Snippet, passage, fragment
 
 **Chunking Strategy**:
-How a Document is split into Chunks: by heading (each Chunk stays inside one section and one page, led by its headings) or by fixed length (each page cut into overlapping pieces of the same size). One setting chooses it for every upload; a Document records the one that split it.
+How a Document is split into Chunks: by heading (each Chunk stays inside one section and one page, led by its headings) or by fixed length (each page cut into overlapping pieces of the same size). A setting chooses it for every upload, and the Owner can pick the other for an upload in the chat UI; a Document records the one that split it.
 _Avoid_: Chunker, splitter, chunking mode
 
 **Reader**:
-What turns a PDF into text before it is chunked: Docling (layout, headings and tables), PyMuPDF (the text layer alone), or a vision model reading each page as an image. One setting chooses it for every upload; a Document records the one that read it.
+What turns a PDF into text before it is chunked: Docling (layout, headings and tables), PyMuPDF (the text layer alone), or a vision model reading each page as an image. A setting chooses it for every upload, and the Owner can pick another for an upload in the chat UI; a Document records the one that read it.
 _Avoid_: Parser, extractor, OCR (that is only part of what a Reader may do)
+
+**Review**:
+The Owner's look at an upload after it is read and chunked, before anything is stored: every page as read beside its Chunks, exactly as they will be embedded. Only what the Owner approves is indexed; discarding stores nothing. Uploads in the chat UI always go through one; the ingest CLI skips it.
+_Avoid_: Preview, approval step, validation
 
 **Citation**:
 A pointer from an answer to the exact document page a claim came from.

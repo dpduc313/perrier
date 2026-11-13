@@ -4,14 +4,18 @@ uv run python -m perry.web
 Handlers that act for the User take Gradio's request first and get the User with
 `user_of`, never from anything the browser holds."""
 
+import html
+import io
 from pathlib import Path
 
 import gradio as gr
+import PIL.Image
 
 from perry import (
     charts,
     dataset_descriptions,
     datasets,
+    documents,
     google_auth,
     ingest,
     models,
@@ -49,6 +53,14 @@ CSS = """
   width: 100%; max-width: 28rem;
   padding: var(--spacing-lg); background: var(--background-fill-primary);
 }
+/* The Review: a page's Chunks beside its image, each exactly as it will be embedded. */
+#review-chunks { max-height: 70vh; overflow-y: auto; }
+.review-chunk {
+  margin-bottom: var(--spacing-lg); padding: var(--spacing-md);
+  border: 1px solid var(--border-color-primary); border-radius: var(--radius-md);
+}
+.review-chunk-meta { font-size: var(--text-sm); color: var(--body-text-color-subdued); }
+.review-chunk pre { white-space: pre-wrap; word-break: break-word; margin: 0; }
 """
 FOCUS_CANCEL = """() => {
   setTimeout(() => document.querySelector("#delete-thread-cancel")?.focus(), 50);
@@ -350,35 +362,135 @@ def unlock_threads(thread_id: str | None):
     return gr.update(interactive=True), gr.update(interactive=True), deletable(thread_id)
 
 
-def propose_upload(request: gr.Request, files: list[str] | None):
-    """Show what ingesting the uploaded files would cost, and wait for the Owner's OK."""
+def propose_upload(
+    request: gr.Request,
+    files: list[str] | None,
+    reader: str | None = None,
+    chunking: str | None = None,
+):
+    """Show what ingesting the uploaded files would cost, read with `reader` and split
+    with `chunking`, and wait for the Owner's OK to read them for Review."""
     owner_of(request)
     if not files:
         return gr.skip(), gr.skip(), gr.skip()
-    estimate = ingest.estimate_ingestion([Path(file) for file in files])
+    estimate = ingest.estimate_ingestion([Path(file) for file in files], chunking, reader)
     try:
         ingest.check_budget(estimate)
     except ingest.OverBudget as refused:
         return [], str(refused), gr.update(visible=False)
-    if not estimate.tokens:
-        # Nothing to pay for (e.g. every file is unchanged): no need to ask.
-        return [], *ingest_upload(request, files)
-    return files, f"{estimate.describe()} Ingest now?", gr.update(visible=True)
+    if estimate.unchanged == estimate.files:
+        return [], "Already stored as it is, read and split the same way.", gr.update(visible=False)
+    question = f"{estimate.describe()} Read for Review? Nothing is indexed until you approve."
+    return files, question, gr.update(visible=True)
 
 
-def ingest_upload(request: gr.Request, files: list[str]):
+def read_upload(
+    request: gr.Request, files: list[str], reader: str | None = None, chunking: str | None = None
+):
+    """Read and chunk the uploaded files for the Owner's Review; nothing is stored yet.
+    Shows the Review panel at the first page read."""
     owner_of(request)
     try:
-        results = ingest.ingest_files([Path(file) for file in files])
+        read, left_out = ingest.read_for_review([Path(file) for file in files], chunking, reader)
     except ingest.OverBudget as refused:
-        return str(refused), gr.update(visible=False)
+        return [], str(refused), gr.update(visible=False), *review_panel([])
+    lines = [f"- {result.describe()}" for result in left_out]
+    if read:
+        lines.append("Review the Chunks, then approve to index them, or discard them.")
+    return read, "\n".join(lines), gr.update(visible=False), *review_panel(read)
+
+
+def approve_review(request: gr.Request, read: list[ingest.ReadDocument]):
+    """Index the reviewed Documents, each exactly as the Review showed it."""
+    owner_of(request)
+    if not read:
+        return [], "Nothing to index.", *review_panel([])
+    results = ingest.store_reviewed(read)
     # The Documents are searchable now; Summaries follow without holding up the upload.
     summaries.start_background()
-    return "\n".join(f"- {r.describe()}" for r in results), gr.update(visible=False)
+    return [], "\n".join(f"- {r.describe()}" for r in results), *review_panel([])
+
+
+def discard_review():
+    return [], "Discarded: nothing indexed.", *review_panel([])
 
 
 def cancel_upload():
     return [], "Nothing ingested.", gr.update(visible=False)
+
+
+def review_panel(read: list[ingest.ReadDocument]) -> list:
+    """The Review panel for `read`: shown at its first page, or hidden if there is none.
+    In order: the panel, the summary, the page picker, the page image, the page's Chunks."""
+    if not read:
+        return [gr.update(visible=False), "", gr.update(choices=[], value=None), None, ""]
+    choices = review_pages(read)
+    first = choices[0][1]
+    return [
+        gr.update(visible=True),
+        review_summary(read),
+        gr.update(choices=choices, value=first),
+        *review_page(read, first),
+    ]
+
+
+def review_summary(read: list[ingest.ReadDocument]) -> str:
+    """A row per Document read: how it was read and split, and what came out."""
+    rows = [
+        (
+            "| Document | Reader | Chunking Strategy | Pages | Chunks | Median characters "
+            "| Most tokens | Pages not read | Fingerprint |"
+        ),
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for document in read:
+        lengths = sorted(len(chunk.text) for chunk in document.chunks)
+        median = lengths[len(lengths) // 2] if lengths else 0
+        tokens = max((models.count_embedding_tokens(c.text) for c in document.chunks), default=0)
+        unread = ", ".join(map(str, document.untranscribed_pages)) or "none"
+        rows.append(
+            f"| {document.name} | {document.reader} | {document.chunking} "
+            f"| {documents.page_count(document.path)} | {len(document.chunks)} | {median} "
+            f"| {tokens} | {unread} | `{document.fingerprint}` |"
+        )
+    return "\n".join(rows)
+
+
+def review_pages(read: list[ingest.ReadDocument]) -> list[tuple[str, str]]:
+    """The page picker's choices: every page of every Document read, those with no
+    Chunks too (a page that came out empty is what a Review is for)."""
+    choices = []
+    for index, document in enumerate(read):
+        for page in range(1, documents.page_count(document.path) + 1):
+            count = sum(1 for chunk in document.chunks if chunk.page == page)
+            label = f"{document.name} · page {page} · {count} Chunks"
+            if page in document.untranscribed_pages:
+                label += " · not read"
+            choices.append((label, f"{index}:{page}"))
+    return choices
+
+
+def review_page(read: list[ingest.ReadDocument], picked: str | None) -> list:
+    """The page picked (`index:page`) as an image (PDFs only) beside its Chunks."""
+    if not read or not picked:
+        return [None, ""]
+    index, page = (int(part) for part in picked.split(":"))
+    document = read[index]
+    image = None
+    if document.path.suffix.lower() == ".pdf":
+        image = PIL.Image.open(io.BytesIO(documents.render_page(document.path, page)))
+    numbered = [(n, c) for n, c in enumerate(document.chunks, start=1) if c.page == page]
+    parts = [f"<p><b>{html.escape(document.name)}, page {page}</b>: {len(numbered)} Chunks</p>"]
+    if page in document.untranscribed_pages:
+        parts.append("<p><b>This page couldn't be read: nothing on it would be searchable.</b></p>")
+    for number, chunk in numbered:
+        tokens = models.count_embedding_tokens(chunk.text)
+        parts.append(
+            f'<div class="review-chunk"><div class="review-chunk-meta">Chunk {number} of '
+            f"{len(document.chunks)} · {len(chunk.text)} characters · {tokens} tokens</div>"
+            f"<pre>{html.escape(chunk.text)}</pre></div>"
+        )
+    return [image, "\n".join(parts)]
 
 
 def upload_datasets(request: gr.Request, files: list[str] | None) -> tuple[str, str]:
@@ -482,12 +594,20 @@ def build(privacy_notice: str = "") -> gr.Blocks:
             )
             # Owner-only controls start hidden; owner_controls shows them to the Owner.
             with gr.Column(visible=False) as document_controls:
+                reader = gr.Dropdown(
+                    choices=list(documents.READERS), value=documents.READER, label="Reader"
+                )
+                chunking = gr.Dropdown(
+                    choices=list(documents.CHUNKINGS),
+                    value=documents.CHUNKING,
+                    label="Chunking Strategy",
+                )
                 uploader = gr.File(
                     file_count="multiple", file_types=[".pdf", ".md", ".txt"], label="Upload"
                 )
                 upload_status = gr.Markdown()
                 with gr.Row(visible=False) as upload_choice:
-                    ingest_button = gr.Button("Ingest", variant="primary", size="sm")
+                    read_button = gr.Button("Read for Review", variant="primary", size="sm")
                     cancel_button = gr.Button("Cancel", size="sm")
             summarising = gr.Markdown()
             # Summaries are written in the background, so the count is polled.
@@ -517,6 +637,21 @@ def build(privacy_notice: str = "") -> gr.Blocks:
             with gr.Row():
                 confirm_delete_button = gr.Button("Delete", variant="stop")
                 cancel_delete_button = gr.Button("Cancel", elem_id="delete-thread-cancel")
+        # The Review: the Owner checks each page's Chunks before anything is indexed.
+        reviewing = gr.State([])  # the Documents read, waiting for the Owner's approval
+        with gr.Column(visible=False) as review:
+            gr.Markdown("## Review before indexing")
+            review_table = gr.Markdown()
+            review_picker = gr.Dropdown(choices=[], label="Page", value=None)
+            with gr.Row():
+                review_image = gr.Image(
+                    label="Page as read", type="pil", interactive=False, height="70vh"
+                )
+                review_chunks = gr.HTML(elem_id="review-chunks")
+            with gr.Row():
+                approve_review_button = gr.Button("Approve and index", variant="primary")
+                discard_review_button = gr.Button("Discard", variant="stop")
+        review_outputs = [review, review_table, review_picker, review_image, review_chunks]
         chatbot = gr.Chatbot(height="75vh", label="Perry")
         # The Confirmation card: one Write Action, shown exactly as it will be performed.
         waiting = gr.State(None)  # the Confirmation the card shows
@@ -602,15 +737,24 @@ def build(privacy_notice: str = "") -> gr.Blocks:
         cancel_delete_button.click(cancel_delete, None, [delete_popup, doomed])
         for switch in (thread_picker.input, new_button.click, confirm_delete_button.click):
             switch(lambda: gr.Audio(value=None, visible=False), None, speaker)
-        then_refresh_status(
-            uploader.upload(
-                propose_upload, uploader, [uploaded, upload_status, upload_choice]
-            ).then(summarising_status, None, summarising)
+        uploader.upload(
+            propose_upload, [uploader, reader, chunking], [uploaded, upload_status, upload_choice]
         )
         then_refresh_status(
-            ingest_button.click(ingest_upload, uploaded, [upload_status, upload_choice]).then(
-                summarising_status, None, summarising
+            read_button.click(
+                read_upload,
+                [uploaded, reader, chunking],
+                [reviewing, upload_status, upload_choice, *review_outputs],
             )
+        )
+        review_picker.input(review_page, [reviewing, review_picker], [review_image, review_chunks])
+        then_refresh_status(
+            approve_review_button.click(
+                approve_review, reviewing, [reviewing, upload_status, *review_outputs]
+            ).then(summarising_status, None, summarising)
+        )
+        discard_review_button.click(
+            discard_review, None, [reviewing, upload_status, *review_outputs]
         )
         cancel_button.click(cancel_upload, None, [uploaded, upload_status, upload_choice])
         dataset_uploader.upload(upload_datasets, dataset_uploader, [dataset_status, datasets_shown])

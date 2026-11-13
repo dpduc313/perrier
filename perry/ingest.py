@@ -4,9 +4,15 @@
 
 It shows the estimated tokens and cost and asks before ingesting. Ingestion counts
 toward the daily cap and is refused, before any model call, if it would exceed it.
+
+Ingesting is two steps: `read_file` reads and chunks a Document (calling the vision
+Reader, if any) without storing anything, and `store` embeds exactly those Chunks and
+writes them. The chat UI puts the Owner's Review between the two (`read_for_review`,
+`store_reviewed`); `ingest_file` does both at once.
 """
 
 import argparse
+import hashlib
 import logging
 import sys
 from collections.abc import Callable
@@ -50,6 +56,29 @@ class IngestResult:
             pages = ", ".join(map(str, self.untranscribed_pages))
             message += f" (couldn't transcribe pages with no text: {pages})"
         return message
+
+
+@dataclass(frozen=True)
+class ReadDocument:
+    """A Document read and chunked, not stored yet: what the Owner reviews before it is
+    indexed. `store` embeds exactly these Chunks, so what was reviewed is what is stored."""
+
+    path: Path
+    name: str
+    content_hash: str
+    reader: str
+    chunking: str
+    chunks: tuple[Chunk, ...]
+    # Pages a vision model failed to read, so nothing on them would be searchable.
+    untranscribed_pages: tuple[int, ...] = ()
+
+    @property
+    def fingerprint(self) -> str:
+        """A short hash of the Chunks as read: the same pages and text, the same value."""
+        digest = hashlib.sha256()
+        for chunk in self.chunks:
+            digest.update(f"{chunk.page}\0{chunk.text}\0".encode())
+        return digest.hexdigest()[:12]
 
 
 @dataclass(frozen=True)
@@ -212,17 +241,20 @@ def _tree_calls(leaf_tokens: list[int]) -> list[EstimatedCall]:
     ]
 
 
-def estimate_ingestion(paths: list[Path]) -> IngestionEstimate:
-    """What `ingest_files(paths)` would cost. Makes no model calls."""
+def estimate_ingestion(
+    paths: list[Path], chunking: str | None = None, reader: str | None = None
+) -> IngestionEstimate:
+    """What `ingest_files(paths)` would cost, read with `reader` and split with
+    `chunking` (the settings if None). Makes no model calls."""
     calls: list[EstimatedCall] = []
     background: list[EstimatedCall] = []
     unchanged = 0
     new_names: set[str] = set()
     for path in paths:
         try:
-            file_calls = estimate_file(path)
+            file_calls = estimate_file(path, chunking, reader)
             if file_calls is not None:
-                background.extend(estimate_background(path))
+                background.extend(estimate_background(path, chunking, reader))
                 new_names.add(path.name)
         except Exception:  # noqa: BLE001 - it will fail at ingestion too, before any model call
             file_calls = []
@@ -281,29 +313,51 @@ def ingest_file(
         if replaces is not None:
             delete_document(replaces)
         return IngestResult(path.name, "unchanged")
+    return store(read_file(path, chunking, reader), embed=embed, replaces=replaces)
 
+
+def read_file(path: Path, chunking: str | None = None, reader: str | None = None) -> ReadDocument:
+    """Read `path` with `reader` and split it with `chunking` (the settings if None),
+    calling the vision Reader or the vision model for the pages they read. Stores nothing."""
     parsed = parse(path, chunking, reader)
     if parsed.read_by_vision_reader and not models.page_reader_supported():
         # Otherwise every page would fail on its own and the Document be stored empty.
         raise models.VisionUnavailable(
             f"The vision reader needs OPENAI_API_KEY to read pages with {models.PAGE_READER_MODEL}."
         )
-    # Call the models before touching the database, so a failed call leaves the old version intact.
     transcribed, untranscribed = _transcribe_pages(path, parsed)
     chunks = sorted([*parsed.chunks, *transcribed], key=lambda chunk: chunk.page)
+    return ReadDocument(
+        path=path,
+        name=parsed.name,
+        content_hash=parsed.content_hash,
+        reader=parsed.reader,
+        chunking=parsed.chunking,
+        chunks=tuple(chunks),
+        untranscribed_pages=untranscribed,
+    )
+
+
+def store(
+    read: ReadDocument, *, embed=models.embed_documents, replaces: str | None = None
+) -> IngestResult:
+    """Embed `read`'s Chunks and store them as its Document, replacing one with the same
+    name (and the Document called `replaces`, if given, in the same step)."""
+    chunks = list(read.chunks)
     texts = [c.text for c in chunks]
+    # Call the models before touching the database, so a failed call leaves the old version intact.
     embeddings = embed(texts) if chunks else []
     late = models.colbert_encode_documents(texts) if chunks and models.colbert_supported() else None
 
     # Postgres and the ColBERT index change together, or neither does (docs/adr/0002).
     with colbert.update() as index, db.pool().connection() as conn, conn.transaction():
-        conn.execute("DELETE FROM documents WHERE name = %s", (parsed.name,))
+        conn.execute("DELETE FROM documents WHERE name = %s", (read.name,))
         if replaces is not None:
             _delete(conn, replaces)
         document_id = conn.execute(
             "INSERT INTO documents (name, content_hash, chunking, reader) "
             "VALUES (%s, %s, %s, %s) RETURNING id",
-            (parsed.name, parsed.content_hash, parsed.chunking, parsed.reader),
+            (read.name, read.content_hash, read.chunking, read.reader),
         ).fetchone()["id"]
         chunk_ids = [
             row["id"]
@@ -334,7 +388,7 @@ def ingest_file(
                 ],
             )
 
-    return IngestResult(parsed.name, "ingested", len(chunks), untranscribed)
+    return IngestResult(read.name, "ingested", len(chunks), read.untranscribed_pages)
 
 
 def delete_document(name: str) -> int:
@@ -439,6 +493,38 @@ def ingest_files(paths: list[Path]) -> list[IngestResult]:
             results.append(ingest_file(path))
         except Exception as error:  # noqa: BLE001 - report per file, keep going with the rest
             results.append(IngestResult(path.name, "failed", error=str(error)))
+    return results
+
+
+def read_for_review(
+    paths: list[Path], chunking: str | None = None, reader: str | None = None
+) -> tuple[list[ReadDocument], list[IngestResult]]:
+    """Read and chunk `paths` for the Owner's Review, after checking that ingesting them
+    fits in today's remaining budget (raises OverBudget before any model call). Stores
+    nothing. Returns the Documents read, and a result for each file left out: unchanged
+    (stored as it is, read and split the same way) or failed."""
+    check_budget(estimate_ingestion(paths, chunking, reader))
+    read: list[ReadDocument] = []
+    left_out: list[IngestResult] = []
+    for path in paths:
+        try:
+            if _unchanged(path, chunking, reader):
+                left_out.append(IngestResult(path.name, "unchanged"))
+            else:
+                read.append(read_file(path, chunking, reader))
+        except Exception as error:  # noqa: BLE001 - report per file, keep going with the rest
+            left_out.append(IngestResult(path.name, "failed", error=str(error)))
+    return read, left_out
+
+
+def store_reviewed(read: list[ReadDocument]) -> list[IngestResult]:
+    """Store the Documents the Owner approved after their Review, each exactly as read."""
+    results = []
+    for document in read:
+        try:
+            results.append(store(document))
+        except Exception as error:  # noqa: BLE001 - report per file, keep going with the rest
+            results.append(IngestResult(document.name, "failed", error=str(error)))
     return results
 
 

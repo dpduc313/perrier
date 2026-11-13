@@ -148,12 +148,13 @@ The repo ships small sample files you can use to try everything: [evals/document
 
 ### 1. Ask your Documents
 
-1. Start Perry and drop a few files into **Documents** in the sidebar (or run `uv run python -m perry.ingest evals\documents`).
-2. Perry shows an estimated token count and cost and asks *Ingest now?* Click **Ingest**. If an upload would exceed today's remaining budget, it is refused before any call is made.
-3. Ask, for example: *What's my Q3 marketing budget?* With the sample files you should get 40,000 dollars, with a Citation to `q3-budget.md`.
-4. Ask something that isn't in your files, such as *What's my Q4 budget?* Perry should say it can't find it rather than guess.
-5. Questions that need two files work too: *How does the offsite compare with the trade fair?*
-6. Each answer ends with its Citations, then a line such as `Found with: Hybrid search (picked logically)` naming the Retrieval Technique that found them and how it was picked: `semantically` when the question was clearly closest to that technique's example questions (no extra model call), `logically` when the model chose from the techniques' descriptions. To try a specific technique, pick it in the sidebar's **Retrieval Technique** dropdown (Auto by default); it is used for your next questions, reported as `(forced)`, until you set it back to Auto. Perry still decides on its own whether a question needs your Documents at all.
+1. Start Perry, pick a **Reader** and a **Chunking Strategy** under **Documents** in the sidebar (they start at `PERRY_DOCUMENT_READER` and `PERRY_CHUNKING`), and drop a few files into **Upload** (or run `uv run python -m perry.ingest evals\documents`, which skips the Review).
+2. Perry shows an estimated token count and cost and asks whether to read the files for Review. Click **Read for Review**. If an upload would exceed today's remaining budget, it is refused before any call is made.
+3. The Review opens above the chat: a table of each Document as read (pages, Chunks, median length, most tokens in a Chunk, pages that couldn't be read, a fingerprint of the Chunks), then a **Page** picker with every page, those that came out with no Chunks too. Each page shows as read beside its Chunks, exactly as they will be embedded. Click **Approve and index** to store them, or **Discard** to store nothing. Nothing is searchable until you approve; the vision Reader's page reading is paid for when you click Read for Review, whichever you choose.
+4. Ask, for example: *What's my Q3 marketing budget?* With the sample files you should get 40,000 dollars, with a Citation to `q3-budget.md`.
+5. Ask something that isn't in your files, such as *What's my Q4 budget?* Perry should say it can't find it rather than guess.
+6. Questions that need two files work too: *How does the offsite compare with the trade fair?*
+7. Each answer ends with its Citations, then a line such as `Found with: Hybrid search (picked logically)` naming the Retrieval Technique that found them and how it was picked: `semantically` when the question was clearly closest to that technique's example questions (no extra model call), `logically` when the model chose from the techniques' descriptions. To try a specific technique, pick it in the sidebar's **Retrieval Technique** dropdown (Auto by default); it is used for your next questions, reported as `(forced)`, until you set it back to Auto. Perry still decides on its own whether a question needs your Documents at all.
 
 ### 2. Replace, rename or delete a Document
 
